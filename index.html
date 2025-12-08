@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cahier de consignes du Temple de Jeanne</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{ --beige:#efe6d8; --accent:#a67c52; --frame:#7a5234; --panel:#f8f3ee; --muted:#5b4a3f; --shadow:0 6px 18px rgba(0,0,0,.12); --today:#c79a6d; --todayText:#2d1f16; --green:#3b7f3b; --bordeaux:#8B0000; }
+    *{box-sizing:border-box}
+    body{font-family:'Cinzel', Georgia, serif;background:linear-gradient(180deg,var(--beige),#f7f1e6);margin:0;padding:24px;color:var(--muted)}
+    .wrap{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr minmax(260px,20%);gap:20px}
+    header{grid-column:1/-1;background:linear-gradient(180deg,#fffaf3,var(--panel));border:4px solid var(--frame);border-radius:14px;padding:18px 22px;box-shadow:var(--shadow);display:flex;align-items:center;gap:18px;flex-wrap:wrap;overflow:hidden}
+    .header-title{flex:1 1 auto;min-width:0}
+    .header-actions{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .logo{width:84px;height:84px;border-radius:12px;border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff,#f0e7d8)}
+    .logo h1{margin:0;font-size:22px;color:var(--frame)}
+    header h2{margin:0;font-size:40px;color:var(--frame);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .card{background:var(--panel);border:3px solid rgba(122,82,52,0.18);padding:14px;border-radius:10px;box-shadow:var(--shadow)}
+    .frame{position:relative;border:3px double var(--frame);padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.6),transparent);box-shadow:0 0 0 1px rgba(176,141,87,.35) inset}
+    .edit-guard{position:relative}
+    .overlay{position:absolute;inset:0;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;border-radius:10px;z-index:10}
+    .hidden{display:none}
+    .main{display:flex;flex-direction:column;gap:12px}
+    .collapsible-header{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;padding:6px 8px;border-radius:8px;background:rgba(166,124,82,.06);user-select:none}
+    .collapsible-body{margin-top:8px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    input[type=date], input[type=text], textarea, select{padding:8px;border-radius:6px;border:1px solid #d6c8b4;background:#fff;width:100%}
+    button{background:var(--accent);color:#fff;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+    button.secondary{background:transparent;border:2px solid var(--accent);color:var(--accent)}
+    button[disabled]{opacity:.6;cursor:not-allowed}
+    .day-list{max-height:520px;overflow:auto}
+    .entry{border-left:6px solid var(--green);padding:12px 14px;margin-bottom:12px;background:linear-gradient(180deg,#fffef0,#fff5b8);border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.06)}
+    .entry.done{opacity:.85}
+    .entry.done strong,.entry.done small{text-decoration:line-through}
+    .entry .row{display:flex;align-items:center;gap:10px}
+    .entry small{display:block;color:#6b5b4e}
+    .entry strong{color:var(--bordeaux)}
+    .badge-pill{display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid var(--frame);background:#fff;font-size:12px}
+    .month-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;font-size:12px}
+    .weekday{font-weight:700;text-align:center;color:#7a6a5a}
+    .day-box{padding:6px;border-radius:10px;border:2px solid rgba(122,82,52,.25);background:#fff;min-height:44px;display:flex;flex-direction:column;justify-content:space-between;color:var(--muted);cursor:pointer}
+    .day-box .d{font-weight:700;font-size:14px;line-height:1.1}
+    .day-box .badge{align-self:flex-end;font-size:11px;border-radius:8px;padding:2px 6px;border:1px solid rgba(122,82,52,.25)}
+    .badge-regular{background:#e9fbe9;border-color:#a6d8a6}
+    .badge-special{background:#ffe5e5;border-color:#ff9b9b}
+    .day-box.today{border-color:var(--today);background:linear-gradient(180deg,#fff, #f4eadf)}
+    .day-box.today .d{color:var(--todayText)}
+    .month-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .today-hero{display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,#fff8e1,#fffbf0);border:4px solid var(--green);border-radius:14px;padding:20px;box-shadow:0 4px 20px rgba(59,127,59,0.4)}
+    .today-number{font-size:64px;line-height:1;border-right:4px double var(--green);padding-right:20px;color:var(--green);font-weight:700}
+    .today-meta{display:flex;flex-direction:column}
+    .today-meta .big{font-size:26px;font-weight:700;color:var(--green)}
+    .status{margin-left:auto;font-size:12px;color:#6f5a4b}
+    @media (max-width:980px){ .wrap{grid-template-columns:1fr} header h2{font-size:28px} }
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+    .modal .panel{background:#fff;border:3px double var(--frame);border-radius:12px;max-width:720px;width:100%;padding:16px}
+    .modal h3{margin:0 0 8px 0;color:var(--frame)}
+    .modal .row{display:flex;gap:8px;margin:6px 0;flex-wrap:wrap}
+    .modal input, .modal select{flex:1 1 140px}
+    .users-table{width:100%;border-collapse:collapse;margin-top:8px}
+    .users-table th,.users-table td{border-bottom:1px dashed #e8dccb;padding:6px;text-align:left}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo"><h1>TDJ</h1></div>
+      <div class="header-title"><h2>Cahier de consignes du Temple de Jeanne</h2></div>
+      <div class="status" id="status-text">⏳ Chargement...</div>
+      <div class="header-actions">
+        <button id="btn-logout" class="secondary">Déconnexion</button>
+        <button id="btn-users">Utilisateurs</button>
+      </div>
+    </header>
+    <main class="card main">
+      <section class="today-hero">
+        <div class="today-number" id="today-number">--</div>
+        <div class="today-meta">
+          <div class="big" id="today-long">Aujourd'hui</div>
+          <div class="muted">Consignes du jour</div>
+        </div>
+        <div class="badge-pill" id="count-badge" style="margin-left:auto">0 consignes</div>
+      </section>
+      <div class="frame" style="background:linear-gradient(135deg,#f0fff0,#fafffa);border:3px solid var(--green);box-shadow:0 4px 15px rgba(59,127,59,0.25)">
+        <h3 style="margin:6px 0;color:var(--green);border-bottom:3px solid var(--green);padding-bottom:6px;font-size:20px">Consignes du jour</h3>
+        <div class="day-list" id="day-list"></div>
+      </div>
+      <div class="frame edit-guard">
+        <div class="overlay hidden" id="guard-day">
+          <div><p style="margin:0 0 8px 0"><strong>Connexion requise</strong></p><button id="open-login-1">Se connecter</button></div>
+        </div>
+        <div class="collapsible-header"><h4 style="margin:6px 0">Édition – consigne du jour</h4><button class="secondary toggle" id="tgl-day">Déployer</button></div>
+        <div class="collapsible-body hidden" id="body-day">
+          <div class="controls">
+            <input id="entry-date" type="date" />
+            <input id="entry-title" type="text" placeholder="Titre" />
+            <button id="btn-add">Ajouter</button>
+          </div>
+          <div class="controls">
+            <input id="filter-date" type="date" />
+            <button id="btn-filter" class="secondary">Afficher</button>
+            <button id="btn-today">Aujourd'hui</button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <aside style="position:sticky;top:24px;align-self:start">
+      <div class="frame">
+        <div class="month-header">
+          <button id="prev-month" class="secondary">◀</button>
+          <div id="month-title" style="font-weight:700"></div>
+          <button id="next-month" class="secondary">▶</button>
+        </div>
+        <div class="month-strip" id="month-strip"></div>
+        <p class="muted" style="margin-top:8px">Pastilles : <span class="badge badge-regular">Jour</span></p>
+      </div>
+    </aside>
+  </div>
+  <div id="user-modal" class="modal">
+    <div class="panel">
+      <h3>Utilisateurs</h3>
+      <div id="user-status" class="muted" style="margin-bottom:8px"></div>
+      <div class="row">
+        <input id="login-username" type="text" placeholder="Identifiant" />
+        <input id="login-password" type="password" placeholder="Mot de passe" />
+        <button id="btn-login">Connexion</button>
+      </div>
+      <div class="row">
+        <input id="new-username" type="text" placeholder="Nouvel identifiant" />
+        <input id="new-password" type="password" placeholder="Nouveau mot de passe" />
+        <select id="new-role"><option value="user">Utilisateur</option><option value="admin">Admin</option></select>
+        <button id="btn-create-user" class="secondary">Créer</button>
+      </div>
+      <h4 style="margin-top:12px">Liste</h4>
+      <table class="users-table"><thead><tr><th>Identifiant</th><th>Rôle</th><th>Actions</th></tr></thead><tbody id="users-list"></tbody></table>
+      <div style="margin-top:10px"><button id="btn-close-users" class="secondary">Fermer</button></div>
+    </div>
+  </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://nuzvzkyngltjvcmdbzcp.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51enZ6a3luZ2x0anZjbWRiemNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNzk2ODEsImV4cCI6MjA4MDc1NTY4MX0.TiB7ZDcxeNls9I0MwcSagaMpbMRC4DrDQ5T1SJkgzCY';
+const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  window.addEventListener('DOMContentLoaded',async function(){
+let serverStatus='ok';
+const storage={
+async get(k){try{const{data,error}=await supabase.from('tdj_data').select('value').eq('key',k).single();if(error&&error.code!=='PGRST116'){console.error('Error:',error);serverStatus='error';updateServerStatus();return null}serverStatus='ok';updateServerStatus();return data?data.value:null}catch(e){console.error(e);serverStatus='error';updateServerStatus();return null}},
+async set(k,v){try{const{error}=await supabase.from('tdj_data').upsert({key:k,value:v},{onConflict:'key'});if(error){console.error('Error:',error);serverStatus='error';updateServerStatus();alert('⚠️ Erreur: '+error.message);return}serverStatus='ok';updateServerStatus()}catch(e){console.error(e);serverStatus='error';updateServerStatus();alert('⚠️ Erreur: '+e.message)}}
+};
+function pad(n){return String(n).padStart(2,'0')}
+function localDateStr(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+function parseYmd(s){const[y,m,dd]=s.split('-').map(Number);return new Date(y,(m||1)-1,dd||1)}
+async function ensureDefaults(){if(!await storage.get('tdj_entries'))await storage.set('tdj_entries',{});if(!await storage.get('tdj_users'))await storage.set('tdj_users',[{username:'admin',password:'temple123',name:'Admin',role:'admin'}]);if(!await storage.get('tdj_current_user'))await storage.set('tdj_current_user',null)}
+ensureDefaults();
+const monthStrip=document.getElementById('month-strip'),monthTitle=document.getElementById('month-title'),todayNum=document.getElementById('today-number'),todayLong=document.getElementById('today-long'),dayList=document.getElementById('day-list'),countBadge=document.getElementById('count-badge'),statusEl=document.getElementById('status-text'),guardDay=document.getElementById('guard-day'),tglDay=document.getElementById('tgl-day'),bodyDay=document.getElementById('body-day'),modal=document.getElementById('user-modal'),userStatus=document.getElementById('user-status'),usersListTbody=document.getElementById('users-list');
+let currentMonthDate=new Date(),selectedDate=localDateStr(new Date());
+async function getCurrentUser(){return await storage.get('tdj_current_user')}
+async function setCurrentUser(u){await storage.set('tdj_current_user',u);await renderAuthStatus()}
+async function getUsers(){const raw=await storage.get('tdj_users');let arr=Array.isArray(raw)?raw:[];arr=arr.filter(Boolean).map(u=>({username:String(u.username||'').trim(),password:String(u.password||''),role:u.role==='admin'?'admin':'user',name:u.name||u.username})).filter(u=>u.username);if(!arr.some(u=>u.role==='admin'))arr.push({username:'admin',password:'temple123',name:'Admin',role:'admin'});return arr}
+function updateServerStatus(){getCurrentUser().then(cu=>{let txt='Statut : '+(cu?('Connecté ('+cu.name+(cu.role?' - '+cu.role:'')+')'):' Non connecté');txt+=' · Serveur : '+(serverStatus==='ok'?'✅ Supabase OK':'❌ Erreur');if(statusEl)statusEl.textContent=txt}).catch(()=>{if(statusEl)statusEl.textContent='Statut : Non connecté · Serveur : '+(serverStatus==='ok'?'✅ OK':'❌ Erreur')})}
+function updateTodayHero(d){const dt=parseYmd(d);todayNum.textContent=String(dt.getDate());todayLong.textContent=dt.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
+async function renderAuthStatus(){const cu=await getCurrentUser();updateServerStatus();userStatus.textContent=cu?('Connecté : '+(cu.name||cu.username)+(cu.role?' ('+cu.role+')':'')):'Non connecté';[document.getElementById('entry-date'),document.getElementById('entry-title'),document.getElementById('btn-add')].forEach(el=>{if(el)el.disabled=!cu});if(guardDay)guardDay.classList.toggle('hidden',!!cu);await renderUsersTable()}
+async function renderUsersTable(){if(!usersListTbody)return;const me=await getCurrentUser();const canAdmin=!!(me&&me.role==='admin');const users=await getUsers();usersListTbody.innerHTML=users.map(u=>'<tr><td>'+u.username+'</td><td>'+u.role+'</td><td>'+(canAdmin&&u.username!=='admin'?'<button class="secondary btn-del-user" data-u="'+u.username+'">Supprimer</button>':'')+'</td></tr>').join('');usersListTbody.querySelectorAll('.btn-del-user').forEach(b=>{b.addEventListener('click',async function(){if(!canAdmin||!confirm('Supprimer "'+b.dataset.u+'" ?'))return;let arr=await getUsers();arr=arr.filter(x=>x.username!==b.dataset.u);if(!arr.some(x=>x.role==='admin'))arr.push({username:'admin',password:'temple123',name:'Admin',role:'admin'});await storage.set('tdj_users',arr);const cu=await getCurrentUser();if(cu&&cu.username===b.dataset.u)await setCurrentUser(null);await renderUsersTable()})})}
+async function renderDay(d){const dt=d||localDateStr(new Date());selectedDate=dt;document.getElementById('filter-date').value=dt;document.getElementById('entry-date').value=dt;updateTodayHero(dt);const entries=await storage.get('tdj_entries')||{};const list=entries[dt]||[];list.forEach(it=>{if(!it.id)it.id='e_'+it.t+'_'+Math.random().toString(36).slice(2,6);if(typeof it.done!=='boolean')it.done=false});dayList.innerHTML=list.length?list.map((e,idx)=>'<div class="entry'+(e.done?' done':'')+'" data-id="'+e.id+'"><div class="row"><input type="checkbox" class="entry-check" data-d="'+dt+'" data-i="'+idx+'"'+(e.done?' checked':'')+'> <strong>'+e.title+'</strong></div><small>— '+(e.by||'')+' '+new Date(e.t).toLocaleTimeString()+' · '+e.id+'</small><button data-d="'+dt+'" data-i="'+idx+'" class="btn-del secondary" style="margin-top:6px">Supprimer</button></div>').join(''):'<p class="muted">Aucune consigne</p>';countBadge.textContent=list.length+' consigne'+(list.length>1?'s':'');document.querySelectorAll('.entry-check').forEach(chk=>{chk.addEventListener('change',async function(ev){const dd=ev.target.dataset.d;const i=Number(ev.target.dataset.i);const es=await storage.get('tdj_entries')||{};if(!es[dd]||!es[dd][i])return;es[dd][i].done=!!ev.target.checked;await storage.set('tdj_entries',es);renderDay(dd);buildMonthStrip(currentMonthDate)})});document.querySelectorAll('.btn-del').forEach(btn=>{btn.addEventListener('click',async function(ev){if(!await getCurrentUser()){alert('Connectez-vous');return}const dd=ev.target.dataset.d;const i=Number(ev.target.dataset.i);const es=await storage.get('tdj_entries')||{};const rec=es[dd]&&es[dd][i];if(!rec)return;es[dd].splice(i,1);await storage.set('tdj_entries',es);renderDay(dd);buildMonthStrip(currentMonthDate)})})}
+const WEEKDAYS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+async function buildMonthStrip(base){const y=base.getFullYear(),m=base.getMonth();const first=new Date(y,m,1),last=new Date(y,m+1,0);const sw=(first.getDay()+6)%7;monthTitle.textContent=first.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});const todayStr=localDateStr(new Date());let html='';html+=WEEKDAYS.map(w=>'<div class="weekday">'+w+'</div>').join('');const tot=Math.ceil((sw+last.getDate())/7)*7;for(let i=0;i<tot;i++){if(i<sw||(i-sw+1)>last.getDate()){html+='<div></div>';continue}const dn=i-sw+1;const ds=y+'-'+pad(m+1)+'-'+pad(dn);const isT=(ds===todayStr);html+='<button class="day-box'+(isT?' today':'')+'" data-date="'+ds+'"><span class="d">'+dn+'</span></button>'}monthStrip.innerHTML=html;const entries=await storage.get('tdj_entries')||{};monthStrip.querySelectorAll('.day-box').forEach(btn=>{const ds=btn.dataset.date;const list=entries[ds]||[];if(list.length){btn.insertAdjacentHTML('beforeend','<span class="badge badge-regular">'+list.length+'</span>')}btn.addEventListener('click',function(){selectedDate=btn.dataset.date;renderDay(selectedDate)})})
+}
+document.getElementById('btn-add').addEventListener('click',async function(){if(!await getCurrentUser()){alert('Connectez-vous');return}const d=document.getElementById('entry-date').value||localDateStr(new Date());const t=(document.getElementById('entry-title').value||'').trim();if(!t){alert('Titre requis');return}const entries=await storage.get('tdj_entries')||{};if(!entries[d])entries[d]=[];const u=await getCurrentUser();const item={id:'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),done:false,t:Date.now(),title:t,by:u?(u.name||u.username):'Op'};entries[d].unshift(item);await storage.set('tdj_entries',entries);document.getElementById('entry-title').value='';renderDay(d);buildMonthStrip(currentMonthDate)});
+document.getElementById('btn-filter').addEventListener('click',function(){const v=document.getElementById('filter-date').value;if(!v)return;selectedDate=v;renderDay(selectedDate)});
+document.getElementById('btn-today').addEventListener('click',function(){selectedDate=localDateStr(new Date());renderDay(selectedDate)});
+document.getElementById('prev-month').addEventListener('click',function(){currentMonthDate=new Date(currentMonthDate.getFullYear(),currentMonthDate.getMonth()-1,1);buildMonthStrip(currentMonthDate)});
+document.getElementById('next-month').addEventListener('click',function(){currentMonthDate=new Date(currentMonthDate.getFullYear(),currentMonthDate.getMonth()+1,1);buildMonthStrip(currentMonthDate)});
+document.getElementById('btn-users').addEventListener('click',function(){modal.style.display='flex';renderAuthStatus()});
+document.getElementById('btn-close-users').addEventListener('click',function(){modal.style.display='none'});
+modal.addEventListener('click',function(e){if(e.target===modal)modal.style.display='none'});
+if(document.getElementById('open-login-1'))document.getElementById('open-login-1').addEventListener('click',function(){modal.style.display='flex';renderAuthStatus()});
+document.getElementById('btn-login').addEventListener('click',async function(){const u=(document.getElementById('login-username').value||'').trim();const p=(document.getElementById('login-password').value||'').trim();const users=await getUsers();const found=users.find(x=>x.username===u&&x.password===p);if(!found){alert('Identifiants invalides');return}await setCurrentUser({username:found.username,name:found.name||found.username,role:found.role||'user'});document.getElementById('login-username').value='';document.getElementById('login-password').value='';modal.style.display='none'});
+document.getElementById('btn-create-user').addEventListener('click',async function(){const me=await getCurrentUser();if(!(me&&me.role==='admin')){alert('Admin requis');return}const u=(document.getElementById('new-username').value||'').trim();const p=(document.getElementById('new-password').value||'').trim();const r=document.getElementById('new-role').value||'user';if(!u||!p){alert('Identifiant et mot de passe requis');return}const users=await getUsers();if(users.some(x=>x.username===u)){alert('Identifiant déjà utilisé');return}users.push({username:u,password:p,name:u,role:r});await storage.set('tdj_users',users);document.getElementById('new-username').value='';document.getElementById('new-password').value='';document.getElementById('new-role').value='user';renderUsersTable()});
+document.getElementById('btn-logout').addEventListener('click',async function(){const cu=await getCurrentUser();if(!cu){alert('Aucun utilisateur connecté');return}await setCurrentUser(null)});
+tglDay.addEventListener('click',function(){const open=tglDay.getAttribute('aria-expanded')!=='true';bodyDay.classList.toggle('hidden',!open);tglDay.setAttribute('aria-expanded',String(open));tglDay.textContent=open?'Réduire':'Déployer'});
+renderAuthStatus();renderDay(selectedDate);buildMonthStrip(currentMonthDate);
+console.log('✅ Application chargée - Calendrier construit');
+});
+</script>
+</body>
+</html>
