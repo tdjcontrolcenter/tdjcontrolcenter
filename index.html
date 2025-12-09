@@ -34,7 +34,7 @@
     .entry.done{opacity:.85}
     .entry.done strong,.entry.done small{text-decoration:line-through}
     .entry .row{display:flex;align-items:center;gap:10px}
-    .entry small{display:block;color:#6b5b4e}
+    .entry small{display:block;color:#6b5b4e;margin-top:4px}
     .entry strong{color:var(--bordeaux)}
     .badge-pill{display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid var(--frame);background:#fff;font-size:12px}
     .month-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;font-size:12px}
@@ -52,14 +52,16 @@
     .today-meta{display:flex;flex-direction:column}
     .today-meta .big{font-size:26px;font-weight:700;color:var(--green)}
     .status{margin-left:auto;font-size:12px;color:#6f5a4b}
+    .side-emph{border:4px double var(--green);background:linear-gradient(180deg,#f6fff6,#e9fbe9);padding:14px;border-radius:14px;box-shadow:0 0 10px rgba(59,127,59,0.25)}
     @media (max-width:980px){ .wrap{grid-template-columns:1fr} header h2{font-size:28px} }
     .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
-    .modal .panel{background:#fff;border:3px double var(--frame);border-radius:12px;max-width:720px;width:100%;padding:16px}
+    .modal .panel{background:#fff;border:3px double var(--frame);border-radius:12px;max-width:720px;width:100%;padding:16px;max-height:90vh;overflow-y:auto}
     .modal h3{margin:0 0 8px 0;color:var(--frame)}
     .modal .row{display:flex;gap:8px;margin:6px 0;flex-wrap:wrap}
     .modal input, .modal select{flex:1 1 140px}
     .users-table{width:100%;border-collapse:collapse;margin-top:8px}
     .users-table th,.users-table td{border-bottom:1px dashed #e8dccb;padding:6px;text-align:left}
+    @media print{.header-actions,.edit-guard,.no-print{display:none!important}}
   </style>
 </head>
 <body>
@@ -68,7 +70,8 @@
       <div class="logo"><h1>TDJ</h1></div>
       <div class="header-title"><h2>Cahier de consignes du Temple de Jeanne</h2></div>
       <div class="status" id="status-text">⏳ Chargement...</div>
-      <div class="header-actions">
+      <div class="header-actions no-print">
+        <button id="btn-print">Imprimer</button>
         <button id="btn-logout" class="secondary">Déconnexion</button>
         <button id="btn-users">Utilisateurs</button>
       </div>
@@ -78,7 +81,7 @@
         <div class="today-number" id="today-number">--</div>
         <div class="today-meta">
           <div class="big" id="today-long">Aujourd'hui</div>
-          <div class="muted">Consignes du jour</div>
+          <div class="muted">Consignes du jour & consignes spéciales</div>
         </div>
         <div class="badge-pill" id="count-badge" style="margin-left:auto">0 consignes</div>
       </section>
@@ -86,22 +89,56 @@
         <h3 style="margin:6px 0;color:var(--green);border-bottom:3px solid var(--green);padding-bottom:6px;font-size:20px">Consignes du jour</h3>
         <div class="day-list" id="day-list"></div>
       </div>
-      <div class="frame edit-guard">
+      <div class="frame side-emph">
+        <h3 style="margin:6px 0;color:var(--green);border-bottom:2px solid var(--green);padding-bottom:4px">Consignes spéciales actives</h3>
+        <div class="day-list" id="active-spec-list"></div>
+      </div>
+      <div class="frame edit-guard no-print">
         <div class="overlay hidden" id="guard-day">
           <div><p style="margin:0 0 8px 0"><strong>Connexion requise</strong></p><button id="open-login-1">Se connecter</button></div>
         </div>
-        <div class="collapsible-header"><h4 style="margin:6px 0">Édition – consigne du jour</h4><button class="secondary toggle" id="tgl-day">Déployer</button></div>
-        <div class="collapsible-body hidden" id="body-day">
+        <div class="collapsible-header"><h4 style="margin:6px 0">📝 Ajouter une consigne du jour</h4><button class="secondary toggle" id="tgl-add">Déployer</button></div>
+        <div class="collapsible-body hidden" id="body-add">
           <div class="controls">
             <input id="entry-date" type="date" />
-            <input id="entry-title" type="text" placeholder="Titre" />
+            <input id="entry-title" type="text" placeholder="Titre de la consigne" />
             <button id="btn-add">Ajouter</button>
           </div>
           <div class="controls">
             <input id="filter-date" type="date" />
-            <button id="btn-filter" class="secondary">Afficher</button>
+            <button id="btn-filter" class="secondary">Afficher ce jour</button>
             <button id="btn-today">Aujourd'hui</button>
           </div>
+        </div>
+      </div>
+      <div class="frame edit-guard no-print">
+        <div class="overlay hidden" id="guard-edit">
+          <div><p style="margin:0 0 8px 0"><strong>Connexion requise</strong></p><button id="open-login-2">Se connecter</button></div>
+        </div>
+        <div class="collapsible-header"><h4 style="margin:6px 0">✏️ Éditer / Supprimer consignes</h4><button class="secondary toggle" id="tgl-edit">Déployer</button></div>
+        <div class="collapsible-body hidden" id="body-edit">
+          <p class="muted" style="margin:8px 0">Sélectionnez une consigne ci-dessous pour la supprimer :</p>
+          <div id="edit-list"></div>
+        </div>
+      </div>
+      <div class="frame edit-guard no-print">
+        <div class="overlay hidden" id="guard-spec">
+          <div><p style="margin:0 0 8px 0"><strong>Connexion requise</strong></p><button id="open-login-3">Se connecter</button></div>
+        </div>
+        <div class="collapsible-header"><h4 style="margin:6px 0">⭐ Consignes spéciales</h4><button class="secondary toggle" id="tgl-spec">Déployer</button></div>
+        <div class="collapsible-body hidden" id="body-spec">
+          <div class="controls">
+            <input id="spec-title" type="text" placeholder="Titre de la consigne spéciale" />
+            <input id="spec-start" type="date" title="Début de validité" />
+            <input id="spec-end" type="date" title="Fin de validité" />
+          </div>
+          <div class="controls">
+            <textarea id="spec-desc" rows="2" placeholder="Description (optionnelle)"></textarea>
+            <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="spec-perma" /> Permanent (sans date de fin)</label>
+            <button id="btn-add-spec">Ajouter</button>
+          </div>
+          <h4 style="margin:12px 0 8px 0;color:var(--green);border-bottom:1px solid var(--green);padding-bottom:2px">Toutes les consignes spéciales</h4>
+          <div id="all-spec-list"></div>
         </div>
       </div>
     </main>
@@ -113,7 +150,7 @@
           <button id="next-month" class="secondary">▶</button>
         </div>
         <div class="month-strip" id="month-strip"></div>
-        <p class="muted" style="margin-top:8px">Pastilles : <span class="badge badge-regular">Jour</span></p>
+        <p class="muted" style="margin-top:8px">Pastilles : <span class="badge badge-regular">Jour</span> <span class="badge badge-special">Spéciales</span></p>
       </div>
     </aside>
   </div>
@@ -151,36 +188,40 @@ async set(k,v){try{const{error}=await supabase.from('tdj_data').upsert({key:k,va
 function pad(n){return String(n).padStart(2,'0')}
 function localDateStr(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
 function parseYmd(s){const[y,m,dd]=s.split('-').map(Number);return new Date(y,(m||1)-1,dd||1)}
-async function ensureDefaults(){if(!await storage.get('tdj_entries'))await storage.set('tdj_entries',{});if(!await storage.get('tdj_users'))await storage.set('tdj_users',[{username:'admin',password:'temple123',name:'Admin',role:'admin'}]);if(!await storage.get('tdj_current_user'))await storage.set('tdj_current_user',null)}
+function isDateInRange(d,s,e){return(!s||d>=s)&&(!e||d<=e)}
+async function ensureDefaults(){if(!await storage.get('tdj_entries'))await storage.set('tdj_entries',{});if(!await storage.get('tdj_specs'))await storage.set('tdj_specs',[]);if(!await storage.get('tdj_users'))await storage.set('tdj_users',[{username:'admin',password:'temple123',name:'Admin',role:'admin'}]);if(!await storage.get('tdj_current_user'))await storage.set('tdj_current_user',null)}
 ensureDefaults();
-const monthStrip=document.getElementById('month-strip'),monthTitle=document.getElementById('month-title'),todayNum=document.getElementById('today-number'),todayLong=document.getElementById('today-long'),dayList=document.getElementById('day-list'),countBadge=document.getElementById('count-badge'),statusEl=document.getElementById('status-text'),guardDay=document.getElementById('guard-day'),tglDay=document.getElementById('tgl-day'),bodyDay=document.getElementById('body-day'),modal=document.getElementById('user-modal'),userStatus=document.getElementById('user-status'),usersListTbody=document.getElementById('users-list');
+const monthStrip=document.getElementById('month-strip'),monthTitle=document.getElementById('month-title'),todayNum=document.getElementById('today-number'),todayLong=document.getElementById('today-long'),dayList=document.getElementById('day-list'),countBadge=document.getElementById('count-badge'),statusEl=document.getElementById('status-text'),guardDay=document.getElementById('guard-day'),guardEdit=document.getElementById('guard-edit'),guardSpec=document.getElementById('guard-spec'),modal=document.getElementById('user-modal'),userStatus=document.getElementById('user-status'),usersListTbody=document.getElementById('users-list'),editList=document.getElementById('edit-list'),activeSpecList=document.getElementById('active-spec-list'),allSpecList=document.getElementById('all-spec-list');
 let currentMonthDate=new Date(),selectedDate=localDateStr(new Date());
 async function getCurrentUser(){return await storage.get('tdj_current_user')}
 async function setCurrentUser(u){await storage.set('tdj_current_user',u);await renderAuthStatus()}
 async function getUsers(){const raw=await storage.get('tdj_users');let arr=Array.isArray(raw)?raw:[];arr=arr.filter(Boolean).map(u=>({username:String(u.username||'').trim(),password:String(u.password||''),role:u.role==='admin'?'admin':'user',name:u.name||u.username})).filter(u=>u.username);if(!arr.some(u=>u.role==='admin'))arr.push({username:'admin',password:'temple123',name:'Admin',role:'admin'});return arr}
 function updateServerStatus(){getCurrentUser().then(cu=>{let txt='Statut : '+(cu?('Connecté ('+cu.name+(cu.role?' - '+cu.role:'')+')'):' Non connecté');txt+=' · Serveur : '+(serverStatus==='ok'?'✅ Supabase OK':'❌ Erreur');if(statusEl)statusEl.textContent=txt}).catch(()=>{if(statusEl)statusEl.textContent='Statut : Non connecté · Serveur : '+(serverStatus==='ok'?'✅ OK':'❌ Erreur')})}
 function updateTodayHero(d){const dt=parseYmd(d);todayNum.textContent=String(dt.getDate());todayLong.textContent=dt.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
-async function renderAuthStatus(){const cu=await getCurrentUser();updateServerStatus();userStatus.textContent=cu?('Connecté : '+(cu.name||cu.username)+(cu.role?' ('+cu.role+')':'')):'Non connecté';[document.getElementById('entry-date'),document.getElementById('entry-title'),document.getElementById('btn-add')].forEach(el=>{if(el)el.disabled=!cu});if(guardDay)guardDay.classList.toggle('hidden',!!cu);await renderUsersTable()}
+async function renderAuthStatus(){const cu=await getCurrentUser();updateServerStatus();userStatus.textContent=cu?('Connecté : '+(cu.name||cu.username)+(cu.role?' ('+cu.role+')':'')):'Non connecté';const enabled=!!cu;[document.getElementById('entry-date'),document.getElementById('entry-title'),document.getElementById('btn-add'),document.getElementById('spec-title'),document.getElementById('spec-desc'),document.getElementById('spec-start'),document.getElementById('spec-end'),document.getElementById('spec-perma'),document.getElementById('btn-add-spec')].forEach(el=>{if(el)el.disabled=!enabled});if(guardDay)guardDay.classList.toggle('hidden',enabled);if(guardEdit)guardEdit.classList.toggle('hidden',enabled);if(guardSpec)guardSpec.classList.toggle('hidden',enabled);await renderUsersTable()}
 async function renderUsersTable(){if(!usersListTbody)return;const me=await getCurrentUser();const canAdmin=!!(me&&me.role==='admin');const users=await getUsers();usersListTbody.innerHTML=users.map(u=>'<tr><td>'+u.username+'</td><td>'+u.role+'</td><td>'+(canAdmin&&u.username!=='admin'?'<button class="secondary btn-del-user" data-u="'+u.username+'">Supprimer</button>':'')+'</td></tr>').join('');usersListTbody.querySelectorAll('.btn-del-user').forEach(b=>{b.addEventListener('click',async function(){if(!canAdmin||!confirm('Supprimer "'+b.dataset.u+'" ?'))return;let arr=await getUsers();arr=arr.filter(x=>x.username!==b.dataset.u);if(!arr.some(x=>x.role==='admin'))arr.push({username:'admin',password:'temple123',name:'Admin',role:'admin'});await storage.set('tdj_users',arr);const cu=await getCurrentUser();if(cu&&cu.username===b.dataset.u)await setCurrentUser(null);await renderUsersTable()})})}
-async function renderDay(d){const dt=d||localDateStr(new Date());selectedDate=dt;document.getElementById('filter-date').value=dt;document.getElementById('entry-date').value=dt;updateTodayHero(dt);const entries=await storage.get('tdj_entries')||{};const list=entries[dt]||[];list.forEach(it=>{if(!it.id)it.id='e_'+it.t+'_'+Math.random().toString(36).slice(2,6);if(typeof it.done!=='boolean')it.done=false});dayList.innerHTML=list.length?list.map((e,idx)=>'<div class="entry'+(e.done?' done':'')+'" data-id="'+e.id+'"><div class="row"><input type="checkbox" class="entry-check" data-d="'+dt+'" data-i="'+idx+'"'+(e.done?' checked':'')+'> <strong>'+e.title+'</strong></div><small>— '+(e.by||'')+' '+new Date(e.t).toLocaleTimeString()+' · '+e.id+'</small><button data-d="'+dt+'" data-i="'+idx+'" class="btn-del secondary" style="margin-top:6px">Supprimer</button></div>').join(''):'<p class="muted">Aucune consigne</p>';countBadge.textContent=list.length+' consigne'+(list.length>1?'s':'');document.querySelectorAll('.entry-check').forEach(chk=>{chk.addEventListener('change',async function(ev){const dd=ev.target.dataset.d;const i=Number(ev.target.dataset.i);const es=await storage.get('tdj_entries')||{};if(!es[dd]||!es[dd][i])return;es[dd][i].done=!!ev.target.checked;await storage.set('tdj_entries',es);renderDay(dd);buildMonthStrip(currentMonthDate)})});document.querySelectorAll('.btn-del').forEach(btn=>{btn.addEventListener('click',async function(ev){if(!await getCurrentUser()){alert('Connectez-vous');return}const dd=ev.target.dataset.d;const i=Number(ev.target.dataset.i);const es=await storage.get('tdj_entries')||{};const rec=es[dd]&&es[dd][i];if(!rec)return;es[dd].splice(i,1);await storage.set('tdj_entries',es);renderDay(dd);buildMonthStrip(currentMonthDate)})})}
+async function renderDay(d){const dt=d||localDateStr(new Date());selectedDate=dt;document.getElementById('filter-date').value=dt;document.getElementById('entry-date').value=dt;updateTodayHero(dt);const entries=await storage.get('tdj_entries')||{};const list=entries[dt]||[];list.forEach(it=>{if(!it.id)it.id='e_'+it.t+'_'+Math.random().toString(36).slice(2,6);if(typeof it.done!=='boolean')it.done=false});dayList.innerHTML=list.length?list.map(e=>'<div class="entry'+(e.done?' done':'')+'" data-id="'+e.id+'"><div class="row"><input type="checkbox" class="entry-check" data-id="'+e.id+'"'+(e.done?' checked':'')+'> <strong>'+e.title+'</strong></div><small>— '+(e.by||'')+' '+new Date(e.t).toLocaleTimeString()+'</small></div>').join(''):'<p class="muted">Aucune consigne</p>';countBadge.textContent=list.length+' consigne'+(list.length>1?'s':'');document.querySelectorAll('.entry-check').forEach(chk=>{chk.addEventListener('change',async function(ev){const id=ev.target.dataset.id;const entries=await storage.get('tdj_entries')||{};const list=entries[dt]||[];const item=list.find(x=>x.id===id);if(!item)return;item.done=!!ev.target.checked;await storage.set('tdj_entries',entries);renderDay(dt);buildMonthStrip(currentMonthDate)})});await renderEditList(dt);await renderSpecs(dt)}
+async function renderEditList(d){if(!editList)return;const entries=await storage.get('tdj_entries')||{};const list=entries[d]||[];editList.innerHTML=list.length?list.map((e,i)=>'<div style="padding:8px;border:2px solid var(--accent);border-radius:8px;margin-bottom:8px;background:#fff"><strong>'+e.title+'</strong><br><small>'+(e.by||'')+' - '+new Date(e.t).toLocaleTimeString()+'</small><br><button class="secondary btn-del-edit" data-i="'+i+'" style="margin-top:6px">🗑️ Supprimer</button></div>').join(''):'<p class="muted">Aucune consigne à éditer</p>';editList.querySelectorAll('.btn-del-edit').forEach(b=>{b.addEventListener('click',async function(){if(!confirm('Supprimer cette consigne ?'))return;const i=Number(b.dataset.i);const entries=await storage.get('tdj_entries')||{};if(entries[d])entries[d].splice(i,1);await storage.set('tdj_entries',entries);renderDay(d);buildMonthStrip(currentMonthDate)})})}
+async function renderSpecs(d){const specs=await storage.get('tdj_specs')||[];const active=specs.filter(s=>isDateInRange(d,s.start,s.end||(s.perma?'9999-12-31':'')));if(activeSpecList)activeSpecList.innerHTML=active.length?active.map(s=>'<div style="padding:8px;border-left:4px solid var(--green);background:#fff;border-radius:6px;margin-bottom:8px"><strong>'+s.title+'</strong><br><small>Valide: '+s.start+' → '+((s.end&&s.end.length)?s.end:'∞')+'</small>'+(s.desc?'<p style="margin:4px 0 0 0">'+s.desc+'</p>':'')+'</div>').join(''):'<p class="muted">Aucune consigne spéciale active</p>';if(allSpecList)allSpecList.innerHTML=specs.length?specs.map(s=>'<div style="padding:8px;border:2px solid var(--green);border-radius:8px;margin-bottom:8px;background:#fff"><strong>'+s.title+'</strong><br><small>Valide: '+s.start+' → '+((s.end&&s.end.length)?s.end:'∞')+'</small>'+(s.desc?'<p style="margin:4px 0 0 0">'+s.desc+'</p>':'')+'<button class="secondary spec-del" data-id="'+s.id+'" style="margin-top:6px">🗑️ Supprimer</button></div>').join(''):'<p class="muted">Aucune consigne spéciale</p>';allSpecList.querySelectorAll('.spec-del').forEach(b=>{b.addEventListener('click',async function(){if(!confirm('Supprimer cette consigne spéciale ?'))return;let list=await storage.get('tdj_specs')||[];list=list.filter(x=>x.id!==b.dataset.id);await storage.set('tdj_specs',list);renderSpecs(selectedDate);buildMonthStrip(currentMonthDate)})})}
 const WEEKDAYS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
-async function buildMonthStrip(base){const y=base.getFullYear(),m=base.getMonth();const first=new Date(y,m,1),last=new Date(y,m+1,0);const sw=(first.getDay()+6)%7;monthTitle.textContent=first.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});const todayStr=localDateStr(new Date());let html='';html+=WEEKDAYS.map(w=>'<div class="weekday">'+w+'</div>').join('');const tot=Math.ceil((sw+last.getDate())/7)*7;for(let i=0;i<tot;i++){if(i<sw||(i-sw+1)>last.getDate()){html+='<div></div>';continue}const dn=i-sw+1;const ds=y+'-'+pad(m+1)+'-'+pad(dn);const isT=(ds===todayStr);html+='<button class="day-box'+(isT?' today':'')+'" data-date="'+ds+'"><span class="d">'+dn+'</span></button>'}monthStrip.innerHTML=html;const entries=await storage.get('tdj_entries')||{};monthStrip.querySelectorAll('.day-box').forEach(btn=>{const ds=btn.dataset.date;const list=entries[ds]||[];if(list.length){btn.insertAdjacentHTML('beforeend','<span class="badge badge-regular">'+list.length+'</span>')}btn.addEventListener('click',function(){selectedDate=btn.dataset.date;renderDay(selectedDate)})})
-}
+async function buildMonthStrip(base){const y=base.getFullYear(),m=base.getMonth();const first=new Date(y,m,1),last=new Date(y,m+1,0);const sw=(first.getDay()+6)%7;monthTitle.textContent=first.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});const todayStr=localDateStr(new Date());let html='';html+=WEEKDAYS.map(w=>'<div class="weekday">'+w+'</div>').join('');const tot=Math.ceil((sw+last.getDate())/7)*7;for(let i=0;i<tot;i++){if(i<sw||(i-sw+1)>last.getDate()){html+='<div></div>';continue}const dn=i-sw+1;const ds=y+'-'+pad(m+1)+'-'+pad(dn);const isT=(ds===todayStr);html+='<button class="day-box'+(isT?' today':'')+'" data-date="'+ds+'"><span class="d">'+dn+'</span></button>'}monthStrip.innerHTML=html;const entries=await storage.get('tdj_entries')||{};const specs=await storage.get('tdj_specs')||[];monthStrip.querySelectorAll('.day-box').forEach(btn=>{const ds=btn.dataset.date;const list=entries[ds]||[];const sc=specs.filter(s=>isDateInRange(ds,s.start,s.end||(s.perma?'9999-12-31':''))).length;if(list.length)btn.insertAdjacentHTML('beforeend','<span class="badge badge-regular">'+list.length+'</span>');if(sc)btn.insertAdjacentHTML('beforeend','<span class="badge badge-special">'+sc+'</span>');btn.addEventListener('click',function(){selectedDate=btn.dataset.date;renderDay(selectedDate)})})}
 document.getElementById('btn-add').addEventListener('click',async function(){if(!await getCurrentUser()){alert('Connectez-vous');return}const d=document.getElementById('entry-date').value||localDateStr(new Date());const t=(document.getElementById('entry-title').value||'').trim();if(!t){alert('Titre requis');return}const entries=await storage.get('tdj_entries')||{};if(!entries[d])entries[d]=[];const u=await getCurrentUser();const item={id:'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),done:false,t:Date.now(),title:t,by:u?(u.name||u.username):'Op'};entries[d].unshift(item);await storage.set('tdj_entries',entries);document.getElementById('entry-title').value='';renderDay(d);buildMonthStrip(currentMonthDate)});
+document.getElementById('btn-add-spec').addEventListener('click',async function(){if(!await getCurrentUser()){alert('Connectez-vous');return}const title=(document.getElementById('spec-title').value||'').trim();const desc=(document.getElementById('spec-desc').value||'').trim();const start=document.getElementById('spec-start').value;const end=document.getElementById('spec-end').value;const perma=!!document.getElementById('spec-perma').checked;if(!title||!start){alert('Titre et date de début requis');return}if(!perma&&end&&end<start){alert('La date de fin doit être >= à la date de début');return}const specs=await storage.get('tdj_specs')||[];const item={id:'s_'+Date.now(),title,desc,start,end:perma?'':end,perma};specs.push(item);await storage.set('tdj_specs',specs);document.getElementById('spec-title').value='';document.getElementById('spec-desc').value='';document.getElementById('spec-start').value='';document.getElementById('spec-end').value='';document.getElementById('spec-perma').checked=false;renderSpecs(selectedDate);buildMonthStrip(currentMonthDate)});
 document.getElementById('btn-filter').addEventListener('click',function(){const v=document.getElementById('filter-date').value;if(!v)return;selectedDate=v;renderDay(selectedDate)});
 document.getElementById('btn-today').addEventListener('click',function(){selectedDate=localDateStr(new Date());renderDay(selectedDate)});
+document.getElementById('btn-print').addEventListener('click',function(){window.print()});
 document.getElementById('prev-month').addEventListener('click',function(){currentMonthDate=new Date(currentMonthDate.getFullYear(),currentMonthDate.getMonth()-1,1);buildMonthStrip(currentMonthDate)});
 document.getElementById('next-month').addEventListener('click',function(){currentMonthDate=new Date(currentMonthDate.getFullYear(),currentMonthDate.getMonth()+1,1);buildMonthStrip(currentMonthDate)});
 document.getElementById('btn-users').addEventListener('click',function(){modal.style.display='flex';renderAuthStatus()});
 document.getElementById('btn-close-users').addEventListener('click',function(){modal.style.display='none'});
 modal.addEventListener('click',function(e){if(e.target===modal)modal.style.display='none'});
-if(document.getElementById('open-login-1'))document.getElementById('open-login-1').addEventListener('click',function(){modal.style.display='flex';renderAuthStatus()});
+['open-login-1','open-login-2','open-login-3'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('click',function(){modal.style.display='flex';renderAuthStatus()})});
 document.getElementById('btn-login').addEventListener('click',async function(){const u=(document.getElementById('login-username').value||'').trim();const p=(document.getElementById('login-password').value||'').trim();const users=await getUsers();const found=users.find(x=>x.username===u&&x.password===p);if(!found){alert('Identifiants invalides');return}await setCurrentUser({username:found.username,name:found.name||found.username,role:found.role||'user'});document.getElementById('login-username').value='';document.getElementById('login-password').value='';modal.style.display='none'});
 document.getElementById('btn-create-user').addEventListener('click',async function(){const me=await getCurrentUser();if(!(me&&me.role==='admin')){alert('Admin requis');return}const u=(document.getElementById('new-username').value||'').trim();const p=(document.getElementById('new-password').value||'').trim();const r=document.getElementById('new-role').value||'user';if(!u||!p){alert('Identifiant et mot de passe requis');return}const users=await getUsers();if(users.some(x=>x.username===u)){alert('Identifiant déjà utilisé');return}users.push({username:u,password:p,name:u,role:r});await storage.set('tdj_users',users);document.getElementById('new-username').value='';document.getElementById('new-password').value='';document.getElementById('new-role').value='user';renderUsersTable()});
 document.getElementById('btn-logout').addEventListener('click',async function(){const cu=await getCurrentUser();if(!cu){alert('Aucun utilisateur connecté');return}await setCurrentUser(null)});
-tglDay.addEventListener('click',function(){const open=tglDay.getAttribute('aria-expanded')!=='true';bodyDay.classList.toggle('hidden',!open);tglDay.setAttribute('aria-expanded',String(open));tglDay.textContent=open?'Réduire':'Déployer'});
+['tgl-add','tgl-edit','tgl-spec'].forEach(id=>{const btn=document.getElementById(id);const bodyId='body-'+id.replace('tgl-','');const body=document.getElementById(bodyId);if(btn&&body)btn.addEventListener('click',function(){const open=btn.getAttribute('aria-expanded')!=='true';body.classList.toggle('hidden',!open);btn.setAttribute('aria-expanded',String(open));btn.textContent=open?'Réduire':'Déployer'})});
 renderAuthStatus();renderDay(selectedDate);buildMonthStrip(currentMonthDate);
-console.log('✅ Application chargée - Calendrier construit');
+console.log('✅ Version 2 complète chargée');
 });
 </script>
 </body>
