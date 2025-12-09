@@ -53,7 +53,21 @@
     .today-meta .big{font-size:26px;font-weight:700;color:var(--green)}
     .status{margin-left:auto;font-size:12px;color:#6f5a4b}
     .side-emph{border:4px double var(--green);background:linear-gradient(180deg,#f6fff6,#e9fbe9);padding:14px;border-radius:14px;box-shadow:0 0 10px rgba(59,127,59,0.25)}
-    @media (max-width:980px){ .wrap{grid-template-columns:1fr} header h2{font-size:28px} }
+    .spec-card{border-left:6px solid var(--bordeaux);padding:16px 18px;margin-bottom:16px;background:linear-gradient(135deg,#fff5f5,#ffe8e8);border-radius:12px;box-shadow:0 4px 12px rgba(139,0,0,0.15)}
+    .spec-card strong{color:var(--bordeaux);font-size:18px;display:block;margin-bottom:4px}
+    .spec-card small{color:#8b6b5b;display:block;margin-top:4px}
+    .spec-card .rooms{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+    .spec-card .room-tag{background:#fff;border:2px solid var(--bordeaux);color:var(--bordeaux);padding:4px 10px;border-radius:6px;font-size:13px;font-weight:600}
+    .rooms-recap{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:12px}
+    .room-recap-card{background:#fff;border:3px solid var(--green);border-radius:10px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+    .room-recap-card .room-number{font-size:20px;font-weight:700;color:var(--green);margin-bottom:4px}
+    .room-recap-card .room-count{font-size:14px;color:var(--muted)}
+    .room-selector{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:6px;margin:10px 0}
+    .room-checkbox{display:flex;align-items:center;gap:4px;padding:6px 8px;border:2px solid #d6c8b4;border-radius:6px;background:#fff;cursor:pointer;transition:all 0.2s}
+    .room-checkbox:hover{background:#f0f0f0}
+    .room-checkbox input[type=checkbox]{cursor:pointer}
+    .room-checkbox.selected{background:var(--green);border-color:var(--green);color:#fff}
+    @media (max-width:980px){ .wrap{grid-template-columns:1fr} header h2{font-size:28px} .rooms-recap{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))} }
     .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
     .modal .panel{background:#fff;border:3px double var(--frame);border-radius:12px;max-width:720px;width:100%;padding:16px;max-height:90vh;overflow-y:auto}
     .modal h3{margin:0 0 8px 0;color:var(--frame)}
@@ -90,8 +104,8 @@
         <div class="day-list" id="day-list"></div>
       </div>
       <div class="frame side-emph">
-        <h3 style="margin:6px 0;color:var(--green);border-bottom:2px solid var(--green);padding-bottom:4px">Consignes spéciales actives</h3>
-        <div class="day-list" id="active-spec-list"></div>
+        <h3 style="margin:6px 0;color:var(--bordeaux);border-bottom:3px solid var(--bordeaux);padding-bottom:6px;font-size:22px">⭐ Consignes spéciales actives</h3>
+        <div id="active-spec-list"></div>
       </div>
       <div class="frame edit-guard no-print">
         <div class="overlay hidden" id="guard-day">
@@ -112,16 +126,6 @@
         </div>
       </div>
       <div class="frame edit-guard no-print">
-        <div class="overlay hidden" id="guard-edit">
-          <div><p style="margin:0 0 8px 0"><strong>Connexion requise</strong></p><button id="open-login-2">Se connecter</button></div>
-        </div>
-        <div class="collapsible-header"><h4 style="margin:6px 0">✏️ Éditer / Supprimer consignes</h4><button class="secondary toggle" id="tgl-edit">Déployer</button></div>
-        <div class="collapsible-body hidden" id="body-edit">
-          <p class="muted" style="margin:8px 0">Sélectionnez une consigne ci-dessous pour la supprimer :</p>
-          <div id="edit-list"></div>
-        </div>
-      </div>
-      <div class="frame edit-guard no-print">
         <div class="overlay hidden" id="guard-spec">
           <div><p style="margin:0 0 8px 0"><strong>Connexion requise</strong></p><button id="open-login-3">Se connecter</button></div>
         </div>
@@ -135,10 +139,24 @@
           <div class="controls">
             <textarea id="spec-desc" rows="2" placeholder="Description (optionnelle)"></textarea>
             <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="spec-perma" /> Permanent (sans date de fin)</label>
-            <button id="btn-add-spec">Ajouter</button>
           </div>
+          <div style="margin:10px 0">
+            <strong style="display:block;margin-bottom:6px">Chambres concernées :</strong>
+            <div class="room-selector" id="room-selector"></div>
+          </div>
+          <button id="btn-add-spec">Ajouter</button>
           <h4 style="margin:12px 0 8px 0;color:var(--green);border-bottom:1px solid var(--green);padding-bottom:2px">Toutes les consignes spéciales</h4>
           <div id="all-spec-list"></div>
+        </div>
+      </div>
+      <div class="frame edit-guard no-print">
+        <div class="overlay hidden" id="guard-edit">
+          <div><p style="margin:0 0 8px 0"><strong>Connexion requise</strong></p><button id="open-login-2">Se connecter</button></div>
+        </div>
+        <div class="collapsible-header"><h4 style="margin:6px 0">✏️ Éditer / Supprimer consignes</h4><button class="secondary toggle" id="tgl-edit">Déployer</button></div>
+        <div class="collapsible-body hidden" id="body-edit">
+          <p class="muted" style="margin:8px 0">Sélectionnez une consigne ci-dessous pour la supprimer :</p>
+          <div id="edit-list"></div>
         </div>
       </div>
     </main>
@@ -151,6 +169,10 @@
         </div>
         <div class="month-strip" id="month-strip"></div>
         <p class="muted" style="margin-top:8px">Pastilles : <span class="badge badge-regular">Jour</span> <span class="badge badge-special">Spéciales</span></p>
+      </div>
+      <div class="frame" style="margin-top:12px">
+        <h4 style="margin:6px 0 10px 0;color:var(--green);border-bottom:2px solid var(--green);padding-bottom:4px">🏨 Chambres avec consignes</h4>
+        <div class="rooms-recap" id="rooms-recap"></div>
       </div>
     </aside>
   </div>
@@ -179,7 +201,8 @@
 const SUPABASE_URL='https://nuzvzkyngltjvcmdbzcp.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51enZ6a3luZ2x0anZjbWRiemNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNzk2ODEsImV4cCI6MjA4MDc1NTY4MX0.TiB7ZDcxeNls9I0MwcSagaMpbMRC4DrDQ5T1SJkgzCY';
 const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-  window.addEventListener('DOMContentLoaded',async function(){
+const ROOMS=['11','12','21','22','23','24','31','32','33','34','41','42','43','44','51','52','61'];
+window.addEventListener('DOMContentLoaded',async function(){
 let serverStatus='ok';
 const storage={
 async get(k){try{const{data,error}=await supabase.from('tdj_data').select('value').eq('key',k).single();if(error&&error.code!=='PGRST116'){console.error('Error:',error);serverStatus='error';updateServerStatus();return null}serverStatus='ok';updateServerStatus();return data?data.value:null}catch(e){console.error(e);serverStatus='error';updateServerStatus();return null}},
@@ -191,8 +214,10 @@ function parseYmd(s){const[y,m,dd]=s.split('-').map(Number);return new Date(y,(m
 function isDateInRange(d,s,e){return(!s||d>=s)&&(!e||d<=e)}
 async function ensureDefaults(){if(!await storage.get('tdj_entries'))await storage.set('tdj_entries',{});if(!await storage.get('tdj_specs'))await storage.set('tdj_specs',[]);if(!await storage.get('tdj_users'))await storage.set('tdj_users',[{username:'admin',password:'temple123',name:'Admin',role:'admin'}]);if(!await storage.get('tdj_current_user'))await storage.set('tdj_current_user',null)}
 ensureDefaults();
-const monthStrip=document.getElementById('month-strip'),monthTitle=document.getElementById('month-title'),todayNum=document.getElementById('today-number'),todayLong=document.getElementById('today-long'),dayList=document.getElementById('day-list'),countBadge=document.getElementById('count-badge'),statusEl=document.getElementById('status-text'),guardDay=document.getElementById('guard-day'),guardEdit=document.getElementById('guard-edit'),guardSpec=document.getElementById('guard-spec'),modal=document.getElementById('user-modal'),userStatus=document.getElementById('user-status'),usersListTbody=document.getElementById('users-list'),editList=document.getElementById('edit-list'),activeSpecList=document.getElementById('active-spec-list'),allSpecList=document.getElementById('all-spec-list');
+const monthStrip=document.getElementById('month-strip'),monthTitle=document.getElementById('month-title'),todayNum=document.getElementById('today-number'),todayLong=document.getElementById('today-long'),dayList=document.getElementById('day-list'),countBadge=document.getElementById('count-badge'),statusEl=document.getElementById('status-text'),guardDay=document.getElementById('guard-day'),guardEdit=document.getElementById('guard-edit'),guardSpec=document.getElementById('guard-spec'),modal=document.getElementById('user-modal'),userStatus=document.getElementById('user-status'),usersListTbody=document.getElementById('users-list'),editList=document.getElementById('edit-list'),activeSpecList=document.getElementById('active-spec-list'),allSpecList=document.getElementById('all-spec-list'),roomsRecap=document.getElementById('rooms-recap'),roomSelector=document.getElementById('room-selector');
 let currentMonthDate=new Date(),selectedDate=localDateStr(new Date());
+function buildRoomSelector(){if(!roomSelector)return;roomSelector.innerHTML=ROOMS.map(r=>'<label class="room-checkbox" data-room="'+r+'"><input type="checkbox" value="'+r+'"> Ch. '+r+'</label>').join('');roomSelector.querySelectorAll('.room-checkbox').forEach(lbl=>{lbl.addEventListener('click',function(e){if(e.target.tagName!=='INPUT'){const chk=lbl.querySelector('input[type=checkbox]');chk.checked=!chk.checked}lbl.classList.toggle('selected',lbl.querySelector('input[type=checkbox]').checked)})})}
+buildRoomSelector();
 async function getCurrentUser(){return await storage.get('tdj_current_user')}
 async function setCurrentUser(u){await storage.set('tdj_current_user',u);await renderAuthStatus()}
 async function getUsers(){const raw=await storage.get('tdj_users');let arr=Array.isArray(raw)?raw:[];arr=arr.filter(Boolean).map(u=>({username:String(u.username||'').trim(),password:String(u.password||''),role:u.role==='admin'?'admin':'user',name:u.name||u.username})).filter(u=>u.username);if(!arr.some(u=>u.role==='admin'))arr.push({username:'admin',password:'temple123',name:'Admin',role:'admin'});return arr}
@@ -200,13 +225,14 @@ function updateServerStatus(){getCurrentUser().then(cu=>{let txt='Statut : '+(cu
 function updateTodayHero(d){const dt=parseYmd(d);todayNum.textContent=String(dt.getDate());todayLong.textContent=dt.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
 async function renderAuthStatus(){const cu=await getCurrentUser();updateServerStatus();userStatus.textContent=cu?('Connecté : '+(cu.name||cu.username)+(cu.role?' ('+cu.role+')':'')):'Non connecté';const enabled=!!cu;[document.getElementById('entry-date'),document.getElementById('entry-title'),document.getElementById('btn-add'),document.getElementById('spec-title'),document.getElementById('spec-desc'),document.getElementById('spec-start'),document.getElementById('spec-end'),document.getElementById('spec-perma'),document.getElementById('btn-add-spec')].forEach(el=>{if(el)el.disabled=!enabled});if(guardDay)guardDay.classList.toggle('hidden',enabled);if(guardEdit)guardEdit.classList.toggle('hidden',enabled);if(guardSpec)guardSpec.classList.toggle('hidden',enabled);await renderUsersTable()}
 async function renderUsersTable(){if(!usersListTbody)return;const me=await getCurrentUser();const canAdmin=!!(me&&me.role==='admin');const users=await getUsers();usersListTbody.innerHTML=users.map(u=>'<tr><td>'+u.username+'</td><td>'+u.role+'</td><td>'+(canAdmin&&u.username!=='admin'?'<button class="secondary btn-del-user" data-u="'+u.username+'">Supprimer</button>':'')+'</td></tr>').join('');usersListTbody.querySelectorAll('.btn-del-user').forEach(b=>{b.addEventListener('click',async function(){if(!canAdmin||!confirm('Supprimer "'+b.dataset.u+'" ?'))return;let arr=await getUsers();arr=arr.filter(x=>x.username!==b.dataset.u);if(!arr.some(x=>x.role==='admin'))arr.push({username:'admin',password:'temple123',name:'Admin',role:'admin'});await storage.set('tdj_users',arr);const cu=await getCurrentUser();if(cu&&cu.username===b.dataset.u)await setCurrentUser(null);await renderUsersTable()})})}
-async function renderDay(d){const dt=d||localDateStr(new Date());selectedDate=dt;document.getElementById('filter-date').value=dt;document.getElementById('entry-date').value=dt;updateTodayHero(dt);const entries=await storage.get('tdj_entries')||{};const list=entries[dt]||[];list.forEach(it=>{if(!it.id)it.id='e_'+it.t+'_'+Math.random().toString(36).slice(2,6);if(typeof it.done!=='boolean')it.done=false});dayList.innerHTML=list.length?list.map(e=>'<div class="entry'+(e.done?' done':'')+'" data-id="'+e.id+'"><div class="row"><input type="checkbox" class="entry-check" data-id="'+e.id+'"'+(e.done?' checked':'')+'> <strong>'+e.title+'</strong></div><small>— '+(e.by||'')+' '+new Date(e.t).toLocaleTimeString()+'</small></div>').join(''):'<p class="muted">Aucune consigne</p>';countBadge.textContent=list.length+' consigne'+(list.length>1?'s':'');document.querySelectorAll('.entry-check').forEach(chk=>{chk.addEventListener('change',async function(ev){const id=ev.target.dataset.id;const entries=await storage.get('tdj_entries')||{};const list=entries[dt]||[];const item=list.find(x=>x.id===id);if(!item)return;item.done=!!ev.target.checked;await storage.set('tdj_entries',entries);renderDay(dt);buildMonthStrip(currentMonthDate)})});await renderEditList(dt);await renderSpecs(dt)}
+  async function renderDay(d){const dt=d||localDateStr(new Date());selectedDate=dt;document.getElementById('filter-date').value=dt;document.getElementById('entry-date').value=dt;updateTodayHero(dt);const entries=await storage.get('tdj_entries')||{};const list=entries[dt]||[];list.forEach(it=>{if(!it.id)it.id='e_'+it.t+'_'+Math.random().toString(36).slice(2,6);if(typeof it.done!=='boolean')it.done=false});dayList.innerHTML=list.length?list.map(e=>'<div class="entry'+(e.done?' done':'')+'" data-id="'+e.id+'"><div class="row"><input type="checkbox" class="entry-check" data-id="'+e.id+'"'+(e.done?' checked':'')+'> <strong>'+e.title+'</strong></div><small>— '+(e.by||'')+' '+new Date(e.t).toLocaleTimeString()+'</small></div>').join(''):'<p class="muted">Aucune consigne</p>';countBadge.textContent=list.length+' consigne'+(list.length>1?'s':'');document.querySelectorAll('.entry-check').forEach(chk=>{chk.addEventListener('change',async function(ev){const id=ev.target.dataset.id;const entries=await storage.get('tdj_entries')||{};const list=entries[dt]||[];const item=list.find(x=>x.id===id);if(!item)return;item.done=!!ev.target.checked;await storage.set('tdj_entries',entries);renderDay(dt);buildMonthStrip(currentMonthDate)})});await renderEditList(dt);await renderSpecs(dt);await renderRoomsRecap(dt)}
 async function renderEditList(d){if(!editList)return;const entries=await storage.get('tdj_entries')||{};const list=entries[d]||[];editList.innerHTML=list.length?list.map((e,i)=>'<div style="padding:8px;border:2px solid var(--accent);border-radius:8px;margin-bottom:8px;background:#fff"><strong>'+e.title+'</strong><br><small>'+(e.by||'')+' - '+new Date(e.t).toLocaleTimeString()+'</small><br><button class="secondary btn-del-edit" data-i="'+i+'" style="margin-top:6px">🗑️ Supprimer</button></div>').join(''):'<p class="muted">Aucune consigne à éditer</p>';editList.querySelectorAll('.btn-del-edit').forEach(b=>{b.addEventListener('click',async function(){if(!confirm('Supprimer cette consigne ?'))return;const i=Number(b.dataset.i);const entries=await storage.get('tdj_entries')||{};if(entries[d])entries[d].splice(i,1);await storage.set('tdj_entries',entries);renderDay(d);buildMonthStrip(currentMonthDate)})})}
-async function renderSpecs(d){const specs=await storage.get('tdj_specs')||[];const active=specs.filter(s=>isDateInRange(d,s.start,s.end||(s.perma?'9999-12-31':'')));if(activeSpecList)activeSpecList.innerHTML=active.length?active.map(s=>'<div style="padding:8px;border-left:4px solid var(--green);background:#fff;border-radius:6px;margin-bottom:8px"><strong>'+s.title+'</strong><br><small>Valide: '+s.start+' → '+((s.end&&s.end.length)?s.end:'∞')+'</small>'+(s.desc?'<p style="margin:4px 0 0 0">'+s.desc+'</p>':'')+'</div>').join(''):'<p class="muted">Aucune consigne spéciale active</p>';if(allSpecList)allSpecList.innerHTML=specs.length?specs.map(s=>'<div style="padding:8px;border:2px solid var(--green);border-radius:8px;margin-bottom:8px;background:#fff"><strong>'+s.title+'</strong><br><small>Valide: '+s.start+' → '+((s.end&&s.end.length)?s.end:'∞')+'</small>'+(s.desc?'<p style="margin:4px 0 0 0">'+s.desc+'</p>':'')+'<button class="secondary spec-del" data-id="'+s.id+'" style="margin-top:6px">🗑️ Supprimer</button></div>').join(''):'<p class="muted">Aucune consigne spéciale</p>';allSpecList.querySelectorAll('.spec-del').forEach(b=>{b.addEventListener('click',async function(){if(!confirm('Supprimer cette consigne spéciale ?'))return;let list=await storage.get('tdj_specs')||[];list=list.filter(x=>x.id!==b.dataset.id);await storage.set('tdj_specs',list);renderSpecs(selectedDate);buildMonthStrip(currentMonthDate)})})}
+async function renderSpecs(d){const specs=await storage.get('tdj_specs')||[];const active=specs.filter(s=>isDateInRange(d,s.start,s.end||(s.perma?'9999-12-31':'')));if(activeSpecList)activeSpecList.innerHTML=active.length?active.map(s=>'<div class="spec-card"><strong>'+s.title+'</strong><small>Valide: '+s.start+' → '+((s.end&&s.end.length)?s.end:'∞')+'</small>'+(s.desc?'<p style="margin:6px 0 0 0">'+s.desc+'</p>':'')+(s.rooms&&s.rooms.length?'<div class="rooms">'+s.rooms.map(r=>'<span class="room-tag">Ch. '+r+'</span>').join('')+'</div>':'<div class="rooms"><span class="room-tag" style="background:#f0f0f0;border-color:#999;color:#666">Toutes les chambres</span></div>')+'</div>').join(''):'<p class="muted">Aucune consigne spéciale active</p>';if(allSpecList)allSpecList.innerHTML=specs.length?specs.map(s=>'<div style="padding:12px;border:2px solid var(--bordeaux);border-radius:8px;margin-bottom:10px;background:#fff"><strong style="color:var(--bordeaux)">'+s.title+'</strong><br><small>Valide: '+s.start+' → '+((s.end&&s.end.length)?s.end:'∞')+'</small>'+(s.desc?'<p style="margin:4px 0 0 0">'+s.desc+'</p>':'')+(s.rooms&&s.rooms.length?'<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">'+s.rooms.map(r=>'<span style="background:var(--bordeaux);color:#fff;padding:3px 8px;border-radius:4px;font-size:12px">Ch. '+r+'</span>').join('')+'</div>':'<div style="margin-top:6px"><span style="background:#e0e0e0;padding:3px 8px;border-radius:4px;font-size:12px">Toutes les chambres</span></div>')+'<button class="secondary spec-del" data-id="'+s.id+'" style="margin-top:8px">🗑️ Supprimer</button></div>').join(''):'<p class="muted">Aucune consigne spéciale</p>';allSpecList.querySelectorAll('.spec-del').forEach(b=>{b.addEventListener('click',async function(){if(!confirm('Supprimer cette consigne spéciale ?'))return;let list=await storage.get('tdj_specs')||[];list=list.filter(x=>x.id!==b.dataset.id);await storage.set('tdj_specs',list);renderSpecs(selectedDate);buildMonthStrip(currentMonthDate);renderRoomsRecap(selectedDate)})})}
+async function renderRoomsRecap(d){if(!roomsRecap)return;const specs=await storage.get('tdj_specs')||[];const active=specs.filter(s=>isDateInRange(d,s.start,s.end||(s.perma?'9999-12-31':'')));const roomCounts={};ROOMS.forEach(r=>roomCounts[r]=0);active.forEach(s=>{if(!s.rooms||!s.rooms.length){ROOMS.forEach(r=>roomCounts[r]++)}else{s.rooms.forEach(r=>{if(roomCounts[r]!==undefined)roomCounts[r]++})}});const withConsignes=Object.entries(roomCounts).filter(([r,c])=>c>0).sort((a,b)=>b[1]-a[1]);if(withConsignes.length===0){roomsRecap.innerHTML='<p class="muted" style="grid-column:1/-1">Aucune chambre avec consignes spéciales actives</p>';return}roomsRecap.innerHTML=withConsignes.map(([r,c])=>'<div class="room-recap-card"><div class="room-number">Ch. '+r+'</div><div class="room-count">'+c+' consigne'+(c>1?'s':'')+'</div></div>').join('')}
 const WEEKDAYS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 async function buildMonthStrip(base){const y=base.getFullYear(),m=base.getMonth();const first=new Date(y,m,1),last=new Date(y,m+1,0);const sw=(first.getDay()+6)%7;monthTitle.textContent=first.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});const todayStr=localDateStr(new Date());let html='';html+=WEEKDAYS.map(w=>'<div class="weekday">'+w+'</div>').join('');const tot=Math.ceil((sw+last.getDate())/7)*7;for(let i=0;i<tot;i++){if(i<sw||(i-sw+1)>last.getDate()){html+='<div></div>';continue}const dn=i-sw+1;const ds=y+'-'+pad(m+1)+'-'+pad(dn);const isT=(ds===todayStr);html+='<button class="day-box'+(isT?' today':'')+'" data-date="'+ds+'"><span class="d">'+dn+'</span></button>'}monthStrip.innerHTML=html;const entries=await storage.get('tdj_entries')||{};const specs=await storage.get('tdj_specs')||[];monthStrip.querySelectorAll('.day-box').forEach(btn=>{const ds=btn.dataset.date;const list=entries[ds]||[];const sc=specs.filter(s=>isDateInRange(ds,s.start,s.end||(s.perma?'9999-12-31':''))).length;if(list.length)btn.insertAdjacentHTML('beforeend','<span class="badge badge-regular">'+list.length+'</span>');if(sc)btn.insertAdjacentHTML('beforeend','<span class="badge badge-special">'+sc+'</span>');btn.addEventListener('click',function(){selectedDate=btn.dataset.date;renderDay(selectedDate)})})}
 document.getElementById('btn-add').addEventListener('click',async function(){if(!await getCurrentUser()){alert('Connectez-vous');return}const d=document.getElementById('entry-date').value||localDateStr(new Date());const t=(document.getElementById('entry-title').value||'').trim();if(!t){alert('Titre requis');return}const entries=await storage.get('tdj_entries')||{};if(!entries[d])entries[d]=[];const u=await getCurrentUser();const item={id:'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),done:false,t:Date.now(),title:t,by:u?(u.name||u.username):'Op'};entries[d].unshift(item);await storage.set('tdj_entries',entries);document.getElementById('entry-title').value='';renderDay(d);buildMonthStrip(currentMonthDate)});
-document.getElementById('btn-add-spec').addEventListener('click',async function(){if(!await getCurrentUser()){alert('Connectez-vous');return}const title=(document.getElementById('spec-title').value||'').trim();const desc=(document.getElementById('spec-desc').value||'').trim();const start=document.getElementById('spec-start').value;const end=document.getElementById('spec-end').value;const perma=!!document.getElementById('spec-perma').checked;if(!title||!start){alert('Titre et date de début requis');return}if(!perma&&end&&end<start){alert('La date de fin doit être >= à la date de début');return}const specs=await storage.get('tdj_specs')||[];const item={id:'s_'+Date.now(),title,desc,start,end:perma?'':end,perma};specs.push(item);await storage.set('tdj_specs',specs);document.getElementById('spec-title').value='';document.getElementById('spec-desc').value='';document.getElementById('spec-start').value='';document.getElementById('spec-end').value='';document.getElementById('spec-perma').checked=false;renderSpecs(selectedDate);buildMonthStrip(currentMonthDate)});
+document.getElementById('btn-add-spec').addEventListener('click',async function(){if(!await getCurrentUser()){alert('Connectez-vous');return}const title=(document.getElementById('spec-title').value||'').trim();const desc=(document.getElementById('spec-desc').value||'').trim();const start=document.getElementById('spec-start').value;const end=document.getElementById('spec-end').value;const perma=!!document.getElementById('spec-perma').checked;const selectedRooms=Array.from(document.querySelectorAll('#room-selector input[type=checkbox]:checked')).map(c=>c.value);if(!title||!start){alert('Titre et date de début requis');return}if(!perma&&end&&end<start){alert('La date de fin doit être >= à la date de début');return}const specs=await storage.get('tdj_specs')||[];const item={id:'s_'+Date.now(),title,desc,start,end:perma?'':end,perma,rooms:selectedRooms};specs.push(item);await storage.set('tdj_specs',specs);document.getElementById('spec-title').value='';document.getElementById('spec-desc').value='';document.getElementById('spec-start').value='';document.getElementById('spec-end').value='';document.getElementById('spec-perma').checked=false;document.querySelectorAll('#room-selector input[type=checkbox]').forEach(c=>{c.checked=false;c.closest('.room-checkbox').classList.remove('selected')});renderSpecs(selectedDate);buildMonthStrip(currentMonthDate);renderRoomsRecap(selectedDate)});
 document.getElementById('btn-filter').addEventListener('click',function(){const v=document.getElementById('filter-date').value;if(!v)return;selectedDate=v;renderDay(selectedDate)});
 document.getElementById('btn-today').addEventListener('click',function(){selectedDate=localDateStr(new Date());renderDay(selectedDate)});
 document.getElementById('btn-print').addEventListener('click',function(){window.print()});
@@ -221,7 +247,7 @@ document.getElementById('btn-create-user').addEventListener('click',async functi
 document.getElementById('btn-logout').addEventListener('click',async function(){const cu=await getCurrentUser();if(!cu){alert('Aucun utilisateur connecté');return}await setCurrentUser(null)});
 ['tgl-add','tgl-edit','tgl-spec'].forEach(id=>{const btn=document.getElementById(id);const bodyId='body-'+id.replace('tgl-','');const body=document.getElementById(bodyId);if(btn&&body)btn.addEventListener('click',function(){const open=btn.getAttribute('aria-expanded')!=='true';body.classList.toggle('hidden',!open);btn.setAttribute('aria-expanded',String(open));btn.textContent=open?'Réduire':'Déployer'})});
 renderAuthStatus();renderDay(selectedDate);buildMonthStrip(currentMonthDate);
-console.log('✅ Version 2 complète chargée');
+console.log('✅ Version 3 complète chargée - Avec chambres !');
 });
 </script>
 </body>
