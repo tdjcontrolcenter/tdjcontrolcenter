@@ -471,10 +471,16 @@ const CHECKLISTS={
 
 window.addEventListener('DOMContentLoaded',async function(){
 // Animation Star Wars
+const intro=document.getElementById('starwars-intro');
+const skipBtn=document.createElement('button');
+skipBtn.className='skip-button';
+skipBtn.textContent='⚡ Accéder au Centre de Contrôle';
+skipBtn.onclick=()=>{if(intro)intro.classList.add('hidden')};
+if(intro)intro.appendChild(skipBtn);
+
 setTimeout(()=>{
-  const intro=document.getElementById('starwars-intro');
   if(intro)intro.classList.add('hidden');
-},4000);
+},8000);
 
 // Horloge temps réel
 function updateClock(){
