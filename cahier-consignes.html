@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cahier de consignes du Temple de Jeanne</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{ --beige:#efe6d8; --accent:#a67c52; --frame:#7a5234; --panel:#f8f3ee; --muted:#5b4a3f; --shadow:0 6px 18px rgba(0,0,0,.12); --today:#c79a6d; --todayText:#2d1f16; --green:#3b7f3b; --bordeaux:#8B0000; }
+    *{box-sizing:border-box}
+    body{font-family:'Cinzel', Georgia, serif;background:linear-gradient(180deg,var(--beige),#f7f1e6);margin:0;padding:24px;color:var(--muted)}
+    .wrap{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr minmax(260px,20%);gap:20px}
+    header{grid-column:1/-1;background:linear-gradient(180deg,#fffaf3,var(--panel));border:4px solid var(--frame);border-radius:14px;padding:18px 22px;box-shadow:var(--shadow);display:flex;align-items:center;gap:18px;flex-wrap:wrap;overflow:hidden}
+    .header-title{flex:1 1 auto;min-width:0}
+    .header-actions{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .logo{width:84px;height:84px;border-radius:12px;border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff,#f0e7d8)}
+    .logo h1{margin:0;font-size:22px;color:var(--frame)}
+    header h2{margin:0;font-size:40px;color:var(--frame);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .card{background:var(--panel);border:3px solid rgba(122,82,52,0.18);padding:14px;border-radius:10px;box-shadow:var(--shadow)}
+    .frame{position:relative;border:3px double var(--frame);padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.6),transparent);box-shadow:0 0 0 1px rgba(176,141,87,.35) inset}
+    .edit-guard{position:relative}
+    .overlay{position:absolute;inset:0;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;border-radius:10px;z-index:10}
+    .hidden{display:none}
+    .main{display:flex;flex-direction:column;gap:12px}
+    .collapsible-header{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;padding:6px 8px;border-radius:8px;background:rgba(166,124,82,.06);user-select:none}
+    .collapsible-body{margin-top:8px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    input[type=date], input[type=text], textarea, select{padding:8px;border-radius:6px;border:1px solid #d6c8b4;background:#fff;width:100%}
+    button{background:var(--accent);color:#fff;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px}
+    button.secondary{background:transparent;border:2px solid var(--accent);color:var(--accent)}
+    button.small{padding:6px 10px;font-size:12px}
+    button[disabled]{opacity:.6;cursor:not-allowed}
+    .day-list{max-height:520px;overflow:auto}
+    .entry{border-left:6px solid var(--green);padding:12px 14px;margin-bottom:12px;background:linear-gradient(180deg,#fffef0,#fff5b8);border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,.06)}
+    .entry.done{opacity:.85}
+    .entry.done strong,.entry.done small{text-decoration:line-through}
+    .entry .row{display:flex;align-items:center;gap:10px}
+    .entry small{display:block;color:#6b5b4e;margin-top:4px}
+    .entry strong{color:var(--bordeaux)}
+    .entry .meta{font-size:11px;color:#8b7a6a;margin-top:4px}
+    .badge-pill{display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid var(--frame);background:#fff;font-size:12px}
+    .month-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;font-size:12px}
+    .weekday{font-weight:700;text-align:center;color:#7a6a5a}
+    .day-box{padding:6px;border-radius:10px;border:2px solid rgba(122,82,52,.25);background:#fff;min-height:44px;display:flex;flex-direction:column;justify-content:space-between;color:var(--muted);cursor:pointer}
+    .day-box .d{font-weight:700;font-size:14px;line-height:1.1}
+    .day-box .badge{align-self:flex-end;font-size:11px;border-radius:8px;padding:2px 6px;border:1px solid rgba(122,82,52,.25)}
+    .badge-regular{background:#e9fbe9;border-color:#a6d8a6}
+    .badge-special{background:#ffe5e5;border-color:#ff9b9b}
+    .day-box.today{border-color:var(--today);background:linear-gradient(180deg,#fff, #f4eadf)}
+    .day-box.today .d{color:var(--todayText)}
+    .month-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .today-hero{display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,#fff8e1,#fffbf0);border:4px solid var(--green);border-radius:14px;padding:20px;box-shadow:0 4px 20px rgba(59,127,59,0.4)}
+    .today-number{font-size:64px;line-height:1;border-right:4px double var(--green);padding-right:20px;color:var(--green);font-weight:700}
+    .today-meta{display:flex;flex-direction:column}
+    .today-meta .big{font-size:26px;font-weight:700;color:var(--green)}
+    .status{margin-left:auto;font-size:12px;color:#6f5a4b}
+    .side-emph{border:4px double var(--green);background:linear-gradient(180deg,#f6fff6,#e9fbe9);padding:14px;border-radius:14px;box-shadow:0 0 10px rgba(59,127,59,0.25)}
+    .spec-card{border-left:6px solid var(--bordeaux);padding:16px 18px;margin-bottom:16px;background:linear-gradient(135deg,#fff5f5,#ffe8e8);border-radius:12px;box-shadow:0 4px 12px rgba(139,0,0,0.15)}
+    .spec-card strong{color:var(--bordeaux);font-size:18px;display:block;margin-bottom:4px}
+    .spec-card small{color:#8b6b5b;display:block;margin-top:4px}
+    .spec-card .rooms{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+    .spec-card .room-tag{background:#fff;border:2px solid var(--bordeaux);color:var(--bordeaux);padding:4px 10px;border-radius:6px;font-size:13px;font-weight:600}
+    .rooms-recap{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:12px}
+    .room-recap-card{background:#fff;border:3px solid var(--green);border-radius:10px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+    .room-recap-card .room-number{font-size:20px;font-weight:700;color:var(--green);margin-bottom:4px}
+    .room-recap-card .room-count{font-size:14px;color:var(--muted)}
+    .room-selector{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:6px;margin:10px 0}
+    .room-checkbox{display:flex;align-items:center;gap:4px;padding:6px 8px;border:2px solid #d6c8b4;border-radius:6px;background:#fff;cursor:pointer;transition:all 0.2s}
+    .room-checkbox:hover{background:#f0f0f0}
+    .room-checkbox input[type=checkbox]{cursor:pointer}
+    .room-checkbox.selected{background:var(--green);border-color:var(--green);color:#fff}
+    .edit-item{padding:10px;border:2px solid var(--accent);border-radius:8px;margin-bottom:10px;background:#fff}
+    .edit-item .actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+    .deleted-item{padding:10px;border:2px solid #999;border-radius:8px;margin-bottom:10px;background:#f5f5f5}
+    .deleted-item .actions{display:flex;gap:6px;margin-top:8px}
+    .tabs{display:flex;gap:8px;margin-bottom:12px;border-bottom:2px solid var(--accent)}
+    .tab{padding:8px 16px;cursor:pointer;border:none;background:transparent;color:var(--muted);font-weight:600;border-bottom:3px solid transparent;transition:all 0.2s}
+    .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+    @media (max-width:980px){ .wrap{grid-template-columns:1fr} header h2{font-size:28px} .rooms-recap{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))} }
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+    .modal .panel{background:#fff;border:3px double var(--frame);border-radius:12px;max-width:720px;width:100%;padding:16px;max-height:90vh;overflow-y:auto}
+    .modal h3{margin:0 0 8px 0;color:var(--frame)}
+    .modal .row{display:flex;gap:8px;margin:6px 0;flex-wrap:wrap}
+    .modal input, .modal select{flex:1 1 140px}
+    .users-table{width:100%;border-collapse:collapse;margin-top:8px}
+    .users-table th,.users-table td{border-bottom:1px dashed #e8dccb;padding:6px;text-align:left}
+    @media print{.header-actions,.edit-guard,.no-print{display:none!important}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo"><h1>TDJ</h1></div>
+      <div class="header-title"><h2>Cahier de consignes du Temple de Jeanne</h2></div>
+      <div class="status" id="status-text">⏳ Chargement...</div>
+      <div class="header-actions no-print">
+        <button id="btn-print">Imprimer</button>
+        <button id="btn-logout" class="secondary">Déconnexion</button>
+        <button id="btn-users">Utilisateurs</button>
+      </div>
+    </header>
+    <main class="card main">
+      <section class="today-hero">
+        <div class="today-number" id="today-number">--</div>
+        <div class="today-meta">
+          <div class="big" id="today-long">Aujourd'hui</div>
+          <div class="muted">Consignes du jour & consignes spéciales</div>
+        </div>
+        <div class="badge-pill" id="count-badge" style="margin-left:auto">0 consignes</div>
+      </section>
+      <div class="frame" style="background:linear-gradient(135deg,#f0fff0,#fafffa);border:3px solid var(--green);box-shadow:0 4px 15px rgba(59,127,59,0.25)">
+        <h3 style="margin:6px 0;color:var(--green);border-bottom:3px solid var(--green);padding-bottom:6px;font-size:20px">Consignes du jour</h3>
+        <div class="day-list" id="day-list"></div>
+      </div>
+      <div class="frame side-emph">
+        <h3 style="margin:6px 0;color:var(--bordeaux);border-bottom:3px solid var(--bordeaux);padding-bottom:6px;font-size:22px">⭐ Consignes spéciales actives</h3>
+        <div id="active-spec-list"></div>
+      </div>
+      <div class="frame edit-guard no-print">
+        <div class="overlay hidden" id="guard-day">
+          <div><p style="margin:0 0 8px 0"><strong>Connexion requise</strong></p><button id="open-login-1">Se connecter</button></div>
+        </div>
+        <div class="collapsible-header"><h4 style="margin:6px 0">📝 Ajouter une consigne du jour</h4><button class="secondary toggle" id="tgl-add">Déployer</button></div>
+        <div class="collapsible-body hidden" id="body-add">
+          <div class="controls">
+            <input id="entry-date" type="date" />
+            <input id="entry-title" type="text" placeholder="Titre de la consigne" />
+            <button id="btn-add">Ajouter</button>
+          </div>
+          <div class="controls">
+            <input id="filter-date" type="date" />
+            <button id="btn-filter" class="secondary">Afficher ce jour</button>
+            <button id="btn-today">Aujourd'hui</button>
+          </div>
+        </div>
+      </div>
+      <div class="frame edit-guard no-print">
+        <div class="overlay hidden" id="guard-spec">
+          <div><p style="margin:0 0 8px 0"><strong>Connexion requise</strong></p><button id="open-login-3">Se connecter</button></div>
+        </div>
+        <div class="collapsible-header"><h4 style="margin:6px 0">⭐ Consignes spéciales</h4><button class="secondary toggle" id="tgl-spec">Déployer</button></div>
+        <div class="collapsible-body hidden" id="body-spec">
+          <div class="controls">
+            <input id="spec-title" type="text" placeholder="Titre de la consigne spéciale" />
+            <input id="spec-start" type="date" title="Début de validité" />
+            <input id="spec-end" type="date" title="Fin de validité" />
+          </div>
+          <div class="controls">
+            <textarea id="spec-desc" rows="2" placeholder="Description (optionnelle)"></textarea>
+            <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="spec-perma" /> Permanent (sans date de fin)</label>
+          </div>
+          <div style="margin:10px 0">
+            <strong style="display:block;margin-bottom:6px">Chambres concernées :</strong>
+            <div class="room-selector" id="room-selector"></div>
+          </div>
+          <button id="btn-add-spec">Ajouter</button>
+          <h4 style="margin:12px 0 8px 0;color:var(--green);border-bottom:1px solid var(--green);padding-bottom:2px">Toutes les consignes spéciales</h4>
+          <div id="all-spec-list"></div>
+        </div>
+      </div>
+      <div class="frame edit-guard no-print">
+        <div class="overlay hidden" id="guard-edit">
+          <div><p style="margin:0 0 8px 0"><strong>Connexion requise</strong></p><button id="open-login-2">Se connecter</button></div>
+        </div>
+        <div class="collapsible-header"><h4 style="margin:6px 0">✏️ Éditer / Supprimer consignes</h4><button class="secondary toggle" id="tgl-edit">Déployer</button></div>
+        <div class="collapsible-body hidden" id="body-edit">
+          <h4 style="margin:8px 0;color:var(--green);border-bottom:2px solid var(--green);padding-bottom:4px">Consignes du jour</h4>
+          <div id="edit-list"></div>
+          <h4 style="margin:16px 0 8px 0;color:var(--bordeaux);border-bottom:2px solid var(--bordeaux);padding-bottom:4px">Consignes spéciales</h4>
+          <div id="edit-spec-list"></div>
+        </div>
+      </div>
+      <div class="frame edit-guard no-print">
+        <div class="overlay hidden" id="guard-history">
+          <div><p style="margin:0 0 8px 0"><strong>Connexion requise</strong></p><button id="open-login-4">Se connecter</button></div>
+        </div>
+        <div class="collapsible-header"><h4 style="margin:6px 0">🗂️ Historique des suppressions</h4><button class="secondary toggle" id="tgl-history">Déployer</button></div>
+        <div class="collapsible-body hidden" id="body-history">
+          <div class="tabs">
+            <button class="tab active" data-tab="deleted-day">Consignes du jour</button>
+            <button class="tab" data-tab="deleted-spec">Consignes spéciales</button>
+          </div>
+          <div id="deleted-day-list" class="tab-content"></div>
+          <div id="deleted-spec-list" class="tab-content hidden"></div>
+        </div>
+      </div>
+    </main>
+    <aside style="position:sticky;top:24px;align-self:start">
+      <div class="frame">
+        <div class="month-header">
+          <button id="prev-month" class="secondary">◀</button>
+          <div id="month-title" style="font-weight:700"></div>
+          <button id="next-month" class="secondary">▶</button>
+        </div>
+        <div class="month-strip" id="month-strip"></div>
+        <p class="muted" style="margin-top:8px">Pastilles : <span class="badge badge-regular">Jour</span> <span class="badge badge-special">Spéciales</span></p>
+      </div>
+      <div class="frame" style="margin-top:12px">
+        <h4 style="margin:6px 0 10px 0;color:var(--green);border-bottom:2px solid var(--green);padding-bottom:4px">🏨 Chambres avec consignes</h4>
+        <div class="rooms-recap" id="rooms-recap"></div>
+      </div>
+    </aside>
+  </div>
+  <div id="user-modal" class="modal">
+    <div class="panel">
+      <h3>Utilisateurs</h3>
+      <div id="user-status" class="muted" style="margin-bottom:8px"></div>
+      <div class="row">
+        <input id="login-username" type="text" placeholder="Identifiant" />
+        <input id="login-password" type="password" placeholder="Mot de passe" />
+        <button id="btn-login">Connexion</button>
+      </div>
+      <div class="row">
+        <input id="new-username" type="text" placeholder="Nouvel identifiant" />
+        <input id="new-password" type="password" placeholder="Nouveau mot de passe" />
+        <select id="new-role"><option value="user">Utilisateur</option><option value="admin">Admin</option></select>
+        <button id="btn-create-user" class="secondary">Créer</button>
+      </div>
+      <h4 style="margin-top:12px">Liste</h4>
+      <table class="users-table"><thead><tr><th>Identifiant</th><th>Rôle</th><th>Actions</th></tr></thead><tbody id="users-list"></tbody></table>
+      <div style="margin-top:10px"><button id="btn-close-users" class="secondary">Fermer</button></div>
+    </div>
+  </div>
+  <div id="edit-modal" class="modal">
+    <div class="panel">
+      <h3 id="edit-modal-title">Éditer la consigne</h3>
+      <input type="hidden" id="edit-item-id" />
+      <input type="hidden" id="edit-item-type" />
+      <div style="margin:12px 0">
+        <label style="display:block;margin-bottom:4px;font-weight:600">Titre :</label>
+        <input id="edit-item-title" type="text" style="width:100%" />
+      </div>
+      <div id="edit-spec-fields" class="hidden">
+        <div style="margin:12px 0">
+          <label style="display:block;margin-bottom:4px;font-weight:600">Description :</label>
+          <textarea id="edit-item-desc" rows="3" style="width:100%"></textarea>
+        </div>
+        <div class="row">
+          <div style="flex:1">
+            <label style="display:block;margin-bottom:4px;font-weight:600">Début :</label>
+            <input id="edit-item-start" type="date" />
+          </div>
+          <div style="flex:1">
+            <label style="display:block;margin-bottom:4px;font-weight:600">Fin :</label>
+            <input id="edit-item-end" type="date" />
+          </div>
+        </div>
+        <div style="margin:12px 0">
+          <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="edit-item-perma" /> Permanent (sans date de fin)</label>
+        </div>
+        <div style="margin:12px 0">
+          <strong style="display:block;margin-bottom:6px">Chambres concernées :</strong>
+          <div class="room-selector" id="edit-room-selector"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button id="btn-save-edit">Enregistrer</button>
+        <button id="btn-cancel-edit" class="secondary">Annuler</button>
+      </div>
+    </div>
+  </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://nuzvzkyngltjvcmdbzcp.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51enZ6a3luZ2x0anZjbWRiemNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNzk2ODEsImV4cCI6MjA4MDc1NTY4MX0.TiB7ZDcxeNls9I0MwcSagaMpbMRC4DrDQ5T1SJkgzCY';
+const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const ROOMS=['11','12','21','22','23','24','31','32','33','34','41','42','43','44','51','52','61'];
+window.addEventListener('DOMContentLoaded',async function(){
+let serverStatus='ok';
+const storage={
+async get(k){try{const{data,error}=await supabase.from('tdj_data').select('value').eq('key',k).single();if(error&&error.code!=='PGRST116'){console.error('Error:',error);serverStatus='error';updateServerStatus();return null}serverStatus='ok';updateServerStatus();return data?data.value:null}catch(e){console.error(e);serverStatus='error';updateServerStatus();return null}},
+async set(k,v){try{const{error}=await supabase.from('tdj_data').upsert({key:k,value:v},{onConflict:'key'});if(error){console.error('Error:',error);serverStatus='error';updateServerStatus();alert('⚠️ Erreur: '+error.message);return}serverStatus='ok';updateServerStatus()}catch(e){console.error(e);serverStatus='error';updateServerStatus();alert('⚠️ Erreur: '+e.message)}}
+};
+function pad(n){return String(n).padStart(2,'0')}
+function localDateStr(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+function parseYmd(s){const[y,m,dd]=s.split('-').map(Number);return new Date(y,(m||1)-1,dd||1)}
+function isDateInRange(d,s,e){return(!s||d>=s)&&(!e||d<=e)}
+async function ensureDefaults(){if(!await storage.get('tdj_entries'))await storage.set('tdj_entries',{});if(!await storage.get('tdj_specs'))await storage.set('tdj_specs',[]);if(!await storage.get('tdj_deleted'))await storage.set('tdj_deleted',{day:[],spec:[]});if(!await storage.get('tdj_users'))await storage.set('tdj_users',[{username:'admin',password:'temple123',name:'Admin',role:'admin'}]);if(!await storage.get('tdj_current_user'))await storage.set('tdj_current_user',null)}
+ensureDefaults();
+  const monthStrip=document.getElementById('month-strip'),monthTitle=document.getElementById('month-title'),todayNum=document.getElementById('today-number'),todayLong=document.getElementById('today-long'),dayList=document.getElementById('day-list'),countBadge=document.getElementById('count-badge'),statusEl=document.getElementById('status-text'),guardDay=document.getElementById('guard-day'),guardEdit=document.getElementById('guard-edit'),guardSpec=document.getElementById('guard-spec'),guardHistory=document.getElementById('guard-history'),modal=document.getElementById('user-modal'),editModal=document.getElementById('edit-modal'),userStatus=document.getElementById('user-status'),usersListTbody=document.getElementById('users-list'),editList=document.getElementById('edit-list'),editSpecList=document.getElementById('edit-spec-list'),activeSpecList=document.getElementById('active-spec-list'),allSpecList=document.getElementById('all-spec-list'),roomsRecap=document.getElementById('rooms-recap'),roomSelector=document.getElementById('room-selector'),editRoomSelector=document.getElementById('edit-room-selector'),deletedDayList=document.getElementById('deleted-day-list'),deletedSpecList=document.getElementById('deleted-spec-list');
+let currentMonthDate=new Date(),selectedDate=localDateStr(new Date());
+function buildRoomSelector(containerId){const container=document.getElementById(containerId);if(!container)return;container.innerHTML=ROOMS.map(r=>'<label class="room-checkbox" data-room="'+r+'"><input type="checkbox" value="'+r+'"> Ch. '+r+'</label>').join('');container.querySelectorAll('.room-checkbox').forEach(lbl=>{lbl.addEventListener('click',function(e){if(e.target.tagName!=='INPUT'){const chk=lbl.querySelector('input[type=checkbox]');chk.checked=!chk.checked}lbl.classList.toggle('selected',lbl.querySelector('input[type=checkbox]').checked)})})}
+buildRoomSelector('room-selector');buildRoomSelector('edit-room-selector');
+async function getCurrentUser(){return await storage.get('tdj_current_user')}
+async function setCurrentUser(u){await storage.set('tdj_current_user',u);await renderAuthStatus()}
+async function getUsers(){const raw=await storage.get('tdj_users');let arr=Array.isArray(raw)?raw:[];arr=arr.filter(Boolean).map(u=>({username:String(u.username||'').trim(),password:String(u.password||''),role:u.role==='admin'?'admin':'user',name:u.name||u.username})).filter(u=>u.username);if(!arr.some(u=>u.role==='admin'))arr.push({username:'admin',password:'temple123',name:'Admin',role:'admin'});return arr}
+function updateServerStatus(){getCurrentUser().then(cu=>{let txt='Statut : '+(cu?('Connecté ('+cu.name+(cu.role?' - '+cu.role:'')+')'):' Non connecté');txt+=' · Serveur : '+(serverStatus==='ok'?'✅ Supabase OK':'❌ Erreur');if(statusEl)statusEl.textContent=txt}).catch(()=>{if(statusEl)statusEl.textContent='Statut : Non connecté · Serveur : '+(serverStatus==='ok'?'✅ OK':'❌ Erreur')})}
+function updateTodayHero(d){const dt=parseYmd(d);todayNum.textContent=String(dt.getDate());todayLong.textContent=dt.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
+async function renderAuthStatus(){const cu=await getCurrentUser();updateServerStatus();userStatus.textContent=cu?('Connecté : '+(cu.name||cu.username)+(cu.role?' ('+cu.role+')':'')):'Non connecté';const enabled=!!cu;[document.getElementById('entry-date'),document.getElementById('entry-title'),document.getElementById('btn-add'),document.getElementById('spec-title'),document.getElementById('spec-desc'),document.getElementById('spec-start'),document.getElementById('spec-end'),document.getElementById('spec-perma'),document.getElementById('btn-add-spec')].forEach(el=>{if(el)el.disabled=!enabled});if(guardDay)guardDay.classList.toggle('hidden',enabled);if(guardEdit)guardEdit.classList.toggle('hidden',enabled);if(guardSpec)guardSpec.classList.toggle('hidden',enabled);if(guardHistory)guardHistory.classList.toggle('hidden',enabled);await renderUsersTable()}
+async function renderUsersTable(){if(!usersListTbody)return;const me=await getCurrentUser();const canAdmin=!!(me&&me.role==='admin');const users=await getUsers();usersListTbody.innerHTML=users.map(u=>'<tr><td>'+u.username+'</td><td>'+u.role+'</td><td>'+(canAdmin&&u.username!=='admin'?'<button class="secondary btn-del-user" data-u="'+u.username+'">Supprimer</button>':'')+'</td></tr>').join('');usersListTbody.querySelectorAll('.btn-del-user').forEach(b=>{b.addEventListener('click',async function(){if(!canAdmin||!confirm('Supprimer "'+b.dataset.u+'" ?'))return;let arr=await getUsers();arr=arr.filter(x=>x.username!==b.dataset.u);if(!arr.some(x=>x.role==='admin'))arr.push({username:'admin',password:'temple123',name:'Admin',role:'admin'});await storage.set('tdj_users',arr);const cu=await getCurrentUser();if(cu&&cu.username===b.dataset.u)await setCurrentUser(null);await renderUsersTable()})})}
+async function addToDeleted(item,type){const deleted=await storage.get('tdj_deleted')||{day:[],spec:[]};const archive={...item,deletedAt:Date.now(),deletedBy:(await getCurrentUser())?.name||'Inconnu'};if(type==='day')deleted.day.unshift(archive);else deleted.spec.unshift(archive);await storage.set('tdj_deleted',deleted)}
+async function renderDay(d){const dt=d||localDateStr(new Date());selectedDate=dt;document.getElementById('filter-date').value=dt;document.getElementById('entry-date').value=dt;updateTodayHero(dt);const entries=await storage.get('tdj_entries')||{};const list=entries[dt]||[];list.forEach(it=>{if(!it.id)it.id='e_'+it.t+'_'+Math.random().toString(36).slice(2,6);if(typeof it.done!=='boolean')it.done=false;if(!it.createdDate)it.createdDate=dt;if(typeof it.reportCount!=='number')it.reportCount=0});dayList.innerHTML=list.length?list.map(e=>'<div class="entry'+(e.done?' done':'')+'" data-id="'+e.id+'"><div class="row"><input type="checkbox" class="entry-check" data-id="'+e.id+'"'+(e.done?' checked':'')+'> <strong>'+e.title+'</strong></div><small>— '+(e.by||'')+' '+new Date(e.t).toLocaleTimeString()+'</small>'+(e.reportCount>0?'<div class="meta">📅 Reportée '+e.reportCount+' fois • Créée le '+e.createdDate+'</div>':'')+'</div>').join(''):'<p class="muted">Aucune consigne</p>';countBadge.textContent=list.length+' consigne'+(list.length>1?'s':'');document.querySelectorAll('.entry-check').forEach(chk=>{chk.addEventListener('change',async function(ev){const id=ev.target.dataset.id;const entries=await storage.get('tdj_entries')||{};const list=entries[dt]||[];const item=list.find(x=>x.id===id);if(!item)return;item.done=!!ev.target.checked;await storage.set('tdj_entries',entries);renderDay(dt);buildMonthStrip(currentMonthDate)})});await renderEditList(dt);await renderSpecs(dt);await renderRoomsRecap(dt)}
+async function renderEditList(d){if(!editList)return;const entries=await storage.get('tdj_entries')||{};const list=entries[d]||[];editList.innerHTML=list.length?list.map((e,i)=>'<div class="edit-item"><strong>'+e.title+'</strong><br><small>'+(e.by||'')+' - '+new Date(e.t).toLocaleTimeString()+'</small>'+(e.reportCount>0?'<br><small class="meta">📅 Reportée '+e.reportCount+' fois • Créée le '+e.createdDate+'</small>':'')+'<div class="actions"><button class="secondary small btn-edit-entry" data-i="'+i+'">✏️ Éditer</button><button class="secondary small btn-report-entry" data-i="'+i+'">📅 Reporter</button><button class="secondary small btn-del-edit" data-i="'+i+'">🗑️ Supprimer</button></div></div>').join(''):'<p class="muted">Aucune consigne du jour</p>';editList.querySelectorAll('.btn-edit-entry').forEach(b=>{b.addEventListener('click',function(){openEditModal(d,'day',Number(b.dataset.i))})});editList.querySelectorAll('.btn-report-entry').forEach(b=>{b.addEventListener('click',async function(){if(!confirm('Reporter cette consigne au lendemain ?'))return;const i=Number(b.dataset.i);const entries=await storage.get('tdj_entries')||{};const item=entries[d][i];const nextDate=localDateStr(new Date(parseYmd(d).getTime()+86400000));if(!entries[nextDate])entries[nextDate]=[];const reported={...item,id:'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),t:Date.now(),reportCount:(item.reportCount||0)+1,createdDate:item.createdDate||d};entries[nextDate].unshift(reported);await storage.set('tdj_entries',entries);alert('Consigne reportée au '+nextDate);renderDay(d);buildMonthStrip(currentMonthDate)})});editList.querySelectorAll('.btn-del-edit').forEach(b=>{b.addEventListener('click',async function(){if(!confirm('Supprimer cette consigne ?'))return;const i=Number(b.dataset.i);const entries=await storage.get('tdj_entries')||{};const item=entries[d][i];await addToDeleted({...item,originalDate:d},'day');entries[d].splice(i,1);await storage.set('tdj_entries',entries);renderDay(d);buildMonthStrip(currentMonthDate);renderDeletedHistory()})})}
+async function renderEditSpecList(){if(!editSpecList)return;const specs=await storage.get('tdj_specs')||[];editSpecList.innerHTML=specs.length?specs.map((s,i)=>'<div class="edit-item"><strong style="color:var(--bordeaux)">'+s.title+'</strong><br><small>Valide: '+s.start+' → '+((s.end&&s.end.length)?s.end:'∞')+'</small>'+(s.desc?'<p style="margin:4px 0 0 0;font-size:13px">'+s.desc+'</p>':'')+(s.rooms&&s.rooms.length?'<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">'+s.rooms.map(r=>'<span style="background:var(--bordeaux);color:#fff;padding:3px 8px;border-radius:4px;font-size:12px">Ch. '+r+'</span>').join('')+'</div>':'')+'<div class="actions"><button class="secondary small btn-edit-spec" data-i="'+i+'">✏️ Éditer</button><button class="secondary small btn-del-spec" data-i="'+i+'">🗑️ Supprimer</button></div></div>').join(''):'<p class="muted">Aucune consigne spéciale</p>';editSpecList.querySelectorAll('.btn-edit-spec').forEach(b=>{b.addEventListener('click',function(){openEditModal(null,'spec',Number(b.dataset.i))})});editSpecList.querySelectorAll('.btn-del-spec').forEach(b=>{b.addEventListener('click',async function(){if(!confirm('Supprimer cette consigne spéciale ?'))return;const i=Number(b.dataset.i);const specs=await storage.get('tdj_specs')||[];const item=specs[i];await addToDeleted(item,'spec');specs.splice(i,1);await storage.set('tdj_specs',specs);renderEditSpecList();renderSpecs(selectedDate);buildMonthStrip(currentMonthDate);renderRoomsRecap(selectedDate);renderDeletedHistory()})})}
+  async function renderSpecs(d){const specs=await storage.get('tdj_specs')||[];const active=specs.filter(s=>isDateInRange(d,s.start,s.end||(s.perma?'9999-12-31':'')));if(activeSpecList)activeSpecList.innerHTML=active.length?active.map(s=>'<div class="spec-card"><strong>'+s.title+'</strong><small>Valide: '+s.start+' → '+((s.end&&s.end.length)?s.end:'∞')+'</small>'+(s.desc?'<p style="margin:6px 0 0 0">'+s.desc+'</p>':'')+(s.rooms&&s.rooms.length?'<div class="rooms">'+s.rooms.map(r=>'<span class="room-tag">Ch. '+r+'</span>').join('')+'</div>':'<div class="rooms"><span class="room-tag" style="background:#f0f0f0;border-color:#999;color:#666">Toutes les chambres</span></div>')+'</div>').join(''):'<p class="muted">Aucune consigne spéciale active</p>';if(allSpecList)allSpecList.innerHTML=specs.length?specs.map(s=>'<div style="padding:12px;border:2px solid var(--bordeaux);border-radius:8px;margin-bottom:10px;background:#fff"><strong style="color:var(--bordeaux)">'+s.title+'</strong><br><small>Valide: '+s.start+' → '+((s.end&&s.end.length)?s.end:'∞')+'</small>'+(s.desc?'<p style="margin:4px 0 0 0">'+s.desc+'</p>':'')+(s.rooms&&s.rooms.length?'<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">'+s.rooms.map(r=>'<span style="background:var(--bordeaux);color:#fff;padding:3px 8px;border-radius:4px;font-size:12px">Ch. '+r+'</span>').join('')+'</div>':'<div style="margin-top:6px"><span style="background:#e0e0e0;padding:3px 8px;border-radius:4px;font-size:12px">Toutes les chambres</span></div>')+'</div>').join(''):'<p class="muted">Aucune consigne spéciale</p>'}
+async function renderRoomsRecap(d){if(!roomsRecap)return;const specs=await storage.get('tdj_specs')||[];const active=specs.filter(s=>isDateInRange(d,s.start,s.end||(s.perma?'9999-12-31':'')));const roomCounts={};ROOMS.forEach(r=>roomCounts[r]=0);active.forEach(s=>{if(!s.rooms||!s.rooms.length){ROOMS.forEach(r=>roomCounts[r]++)}else{s.rooms.forEach(r=>{if(roomCounts[r]!==undefined)roomCounts[r]++})}});const withConsignes=Object.entries(roomCounts).filter(([r,c])=>c>0).sort((a,b)=>b[1]-a[1]);if(withConsignes.length===0){roomsRecap.innerHTML='<p class="muted" style="grid-column:1/-1">Aucune chambre avec consignes spéciales actives</p>';return}roomsRecap.innerHTML=withConsignes.map(([r,c])=>'<div class="room-recap-card"><div class="room-number">Ch. '+r+'</div><div class="room-count">'+c+' consigne'+(c>1?'s':'')+'</div></div>').join('')}
+async function renderDeletedHistory(){const deleted=await storage.get('tdj_deleted')||{day:[],spec:[]};if(deletedDayList)deletedDayList.innerHTML=deleted.day.length?deleted.day.map((e,i)=>'<div class="deleted-item"><strong>'+e.title+'</strong><br><small>Supprimée le '+new Date(e.deletedAt).toLocaleString()+' par '+e.deletedBy+'</small>'+(e.originalDate?'<br><small>Date originale: '+e.originalDate+'</small>':'')+'<div class="actions"><button class="secondary small btn-restore-day" data-i="'+i+'">↩️ Restaurer</button></div></div>').join(''):'<p class="muted">Aucune consigne supprimée</p>';if(deletedSpecList)deletedSpecList.innerHTML=deleted.spec.length?deleted.spec.map((s,i)=>'<div class="deleted-item"><strong style="color:var(--bordeaux)">'+s.title+'</strong><br><small>Supprimée le '+new Date(s.deletedAt).toLocaleString()+' par '+s.deletedBy+'</small><br><small>Validité: '+s.start+' → '+((s.end&&s.end.length)?s.end:'∞')+'</small><div class="actions"><button class="secondary small btn-restore-spec" data-i="'+i+'">↩️ Restaurer</button></div></div>').join(''):'<p class="muted">Aucune consigne spéciale supprimée</p>';deletedDayList.querySelectorAll('.btn-restore-day').forEach(b=>{b.addEventListener('click',async function(){if(!confirm('Restaurer cette consigne ?'))return;const i=Number(b.dataset.i);const deleted=await storage.get('tdj_deleted')||{day:[],spec:[]};const item=deleted.day[i];const restoreDate=item.originalDate||localDateStr(new Date());const entries=await storage.get('tdj_entries')||{};if(!entries[restoreDate])entries[restoreDate]=[];const{deletedAt,deletedBy,originalDate,...cleanItem}=item;entries[restoreDate].unshift({...cleanItem,id:'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),t:Date.now()});await storage.set('tdj_entries',entries);deleted.day.splice(i,1);await storage.set('tdj_deleted',deleted);alert('Consigne restaurée au '+restoreDate);renderDay(selectedDate);buildMonthStrip(currentMonthDate);renderDeletedHistory()})});deletedSpecList.querySelectorAll('.btn-restore-spec').forEach(b=>{b.addEventListener('click',async function(){if(!confirm('Restaurer cette consigne spéciale ?'))return;const i=Number(b.dataset.i);const deleted=await storage.get('tdj_deleted')||{day:[],spec:[]};const item=deleted.spec[i];const specs=await storage.get('tdj_specs')||[];const{deletedAt,deletedBy,...cleanItem}=item;specs.push({...cleanItem,id:'s_'+Date.now()});await storage.set('tdj_specs',specs);deleted.spec.splice(i,1);await storage.set('tdj_deleted',deleted);alert('Consigne spéciale restaurée');renderEditSpecList();renderSpecs(selectedDate);buildMonthStrip(currentMonthDate);renderRoomsRecap(selectedDate);renderDeletedHistory()})})}
+function openEditModal(date,type,index){document.getElementById('edit-item-id').value=index;document.getElementById('edit-item-type').value=type;const specFields=document.getElementById('edit-spec-fields');if(type==='day'){const entries=storage.get('tdj_entries').then(e=>{const item=(e||{})[date][index];document.getElementById('edit-modal-title').textContent='Éditer la consigne du jour';document.getElementById('edit-item-title').value=item.title;specFields.classList.add('hidden');editModal.style.display='flex'})}else{storage.get('tdj_specs').then(specs=>{const item=specs[index];document.getElementById('edit-modal-title').textContent='Éditer la consigne spéciale';document.getElementById('edit-item-title').value=item.title;document.getElementById('edit-item-desc').value=item.desc||'';document.getElementById('edit-item-start').value=item.start;document.getElementById('edit-item-end').value=item.end||'';document.getElementById('edit-item-perma').checked=!!item.perma;specFields.classList.remove('hidden');document.querySelectorAll('#edit-room-selector input[type=checkbox]').forEach(c=>{c.checked=(item.rooms||[]).includes(c.value);c.closest('.room-checkbox').classList.toggle('selected',c.checked)});editModal.style.display='flex'})}}
+document.getElementById('btn-save-edit').addEventListener('click',async function(){const type=document.getElementById('edit-item-type').value;const index=Number(document.getElementById('edit-item-id').value);const newTitle=document.getElementById('edit-item-title').value.trim();if(!newTitle){alert('Titre requis');return}if(type==='day'){const entries=await storage.get('tdj_entries')||{};const item=entries[selectedDate][index];item.title=newTitle;await storage.set('tdj_entries',entries);renderDay(selectedDate)}else{const specs=await storage.get('tdj_specs')||[];const item=specs[index];item.title=newTitle;item.desc=document.getElementById('edit-item-desc').value.trim();item.start=document.getElementById('edit-item-start').value;const perma=document.getElementById('edit-item-perma').checked;item.end=perma?'':document.getElementById('edit-item-end').value;item.perma=perma;item.rooms=Array.from(document.querySelectorAll('#edit-room-selector input[type=checkbox]:checked')).map(c=>c.value);await storage.set('tdj_specs',specs);renderEditSpecList();renderSpecs(selectedDate);buildMonthStrip(currentMonthDate);renderRoomsRecap(selectedDate)}editModal.style.display='none'});
+document.getElementById('btn-cancel-edit').addEventListener('click',function(){editModal.style.display='none'});
+editModal.addEventListener('click',function(e){if(e.target===editModal)editModal.style.display='none'});
+const WEEKDAYS=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+async function buildMonthStrip(base){const y=base.getFullYear(),m=base.getMonth();const first=new Date(y,m,1),last=new Date(y,m+1,0);const sw=(first.getDay()+6)%7;monthTitle.textContent=first.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});const todayStr=localDateStr(new Date());let html='';html+=WEEKDAYS.map(w=>'<div class="weekday">'+w+'</div>').join('');const tot=Math.ceil((sw+last.getDate())/7)*7;for(let i=0;i<tot;i++){if(i<sw||(i-sw+1)>last.getDate()){html+='<div></div>';continue}const dn=i-sw+1;const ds=y+'-'+pad(m+1)+'-'+pad(dn);const isT=(ds===todayStr);html+='<button class="day-box'+(isT?' today':'')+'" data-date="'+ds+'"><span class="d">'+dn+'</span></button>'}monthStrip.innerHTML=html;const entries=await storage.get('tdj_entries')||{};const specs=await storage.get('tdj_specs')||[];monthStrip.querySelectorAll('.day-box').forEach(btn=>{const ds=btn.dataset.date;const list=entries[ds]||[];const sc=specs.filter(s=>isDateInRange(ds,s.start,s.end||(s.perma?'9999-12-31':''))).length;if(list.length)btn.insertAdjacentHTML('beforeend','<span class="badge badge-regular">'+list.length+'</span>');if(sc)btn.insertAdjacentHTML('beforeend','<span class="badge badge-special">'+sc+'</span>');btn.addEventListener('click',function(){selectedDate=btn.dataset.date;renderDay(selectedDate)})})}
+document.getElementById('btn-add').addEventListener('click',async function(){if(!await getCurrentUser()){alert('Connectez-vous');return}const d=document.getElementById('entry-date').value||localDateStr(new Date());const t=(document.getElementById('entry-title').value||'').trim();if(!t){alert('Titre requis');return}const entries=await storage.get('tdj_entries')||{};if(!entries[d])entries[d]=[];const u=await getCurrentUser();const item={id:'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),done:false,t:Date.now(),title:t,by:u?(u.name||u.username):'Op',createdDate:d,reportCount:0};entries[d].unshift(item);await storage.set('tdj_entries',entries);document.getElementById('entry-title').value='';renderDay(d);buildMonthStrip(currentMonthDate)});
+document.getElementById('btn-add-spec').addEventListener('click',async function(){if(!await getCurrentUser()){alert('Connectez-vous');return}const title=(document.getElementById('spec-title').value||'').trim();const desc=(document.getElementById('spec-desc').value||'').trim();const start=document.getElementById('spec-start').value;const end=document.getElementById('spec-end').value;const perma=!!document.getElementById('spec-perma').checked;const selectedRooms=Array.from(document.querySelectorAll('#room-selector input[type=checkbox]:checked')).map(c=>c.value);if(!title||!start){alert('Titre et date de début requis');return}if(!perma&&end&&end<start){alert('La date de fin doit être >= à la date de début');return}const specs=await storage.get('tdj_specs')||[];const item={id:'s_'+Date.now(),title,desc,start,end:perma?'':end,perma,rooms:selectedRooms};specs.push(item);await storage.set('tdj_specs',specs);document.getElementById('spec-title').value='';document.getElementById('spec-desc').value='';document.getElementById('spec-start').value='';document.getElementById('spec-end').value='';document.getElementById('spec-perma').checked=false;document.querySelectorAll('#room-selector input[type=checkbox]').forEach(c=>{c.checked=false;c.closest('.room-checkbox').classList.remove('selected')});renderEditSpecList();renderSpecs(selectedDate);buildMonthStrip(currentMonthDate);renderRoomsRecap(selectedDate)});
+document.getElementById('btn-filter').addEventListener('click',function(){const v=document.getElementById('filter-date').value;if(!v)return;selectedDate=v;renderDay(selectedDate)});
+document.getElementById('btn-today').addEventListener('click',function(){selectedDate=localDateStr(new Date());renderDay(selectedDate)});
+document.getElementById('btn-print').addEventListener('click',function(){window.print()});
+document.getElementById('prev-month').addEventListener('click',function(){currentMonthDate=new Date(currentMonthDate.getFullYear(),currentMonthDate.getMonth()-1,1);buildMonthStrip(currentMonthDate)});
+document.getElementById('next-month').addEventListener('click',function(){currentMonthDate=new Date(currentMonthDate.getFullYear(),currentMonthDate.getMonth()+1,1);buildMonthStrip(currentMonthDate)});
+document.getElementById('btn-users').addEventListener('click',function(){modal.style.display='flex';renderAuthStatus()});
+document.getElementById('btn-close-users').addEventListener('click',function(){modal.style.display='none'});
+modal.addEventListener('click',function(e){if(e.target===modal)modal.style.display='none'});
+['open-login-1','open-login-2','open-login-3','open-login-4'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('click',function(){modal.style.display='flex';renderAuthStatus()})});
+document.getElementById('btn-login').addEventListener('click',async function(){const u=(document.getElementById('login-username').value||'').trim();const p=(document.getElementById('login-password').value||'').trim();const users=await getUsers();const found=users.find(x=>x.username===u&&x.password===p);if(!found){alert('Identifiants invalides');return}await setCurrentUser({username:found.username,name:found.name||found.username,role:found.role||'user'});document.getElementById('login-username').value='';document.getElementById('login-password').value='';modal.style.display='none'});
+document.getElementById('btn-create-user').addEventListener('click',async function(){const me=await getCurrentUser();if(!(me&&me.role==='admin')){alert('Admin requis');return}const u=(document.getElementById('new-username').value||'').trim();const p=(document.getElementById('new-password').value||'').trim();const r=document.getElementById('new-role').value||'user';if(!u||!p){alert('Identifiant et mot de passe requis');return}const users=await getUsers();if(users.some(x=>x.username===u)){alert('Identifiant déjà utilisé');return}users.push({username:u,password:p,name:u,role:r});await storage.set('tdj_users',users);document.getElementById('new-username').value='';document.getElementById('new-password').value='';document.getElementById('new-role').value='user';renderUsersTable()});
+document.getElementById('btn-logout').addEventListener('click',async function(){const cu=await getCurrentUser();if(!cu){alert('Aucun utilisateur connecté');return}await setCurrentUser(null)});
+['tgl-add','tgl-edit','tgl-spec','tgl-history'].forEach(id=>{const btn=document.getElementById(id);const bodyId='body-'+id.replace('tgl-','');const body=document.getElementById(bodyId);if(btn&&body)btn.addEventListener('click',function(){const open=btn.getAttribute('aria-expanded')!=='true';body.classList.toggle('hidden',!open);btn.setAttribute('aria-expanded',String(open));btn.textContent=open?'Réduire':'Déployer'})});
+document.querySelectorAll('.tab').forEach(tab=>{tab.addEventListener('click',function(){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');document.querySelectorAll('.tab-content').forEach(c=>c.classList.add('hidden'));const target=tab.dataset.tab+'-list';document.getElementById(target).classList.remove('hidden')})});
+renderAuthStatus();renderDay(selectedDate);buildMonthStrip(currentMonthDate);renderEditSpecList();renderDeletedHistory();
+console.log('✅ Version 4 complète chargée - Avec édition, reports et historique !');
+});
+</script>
+</body>
+</html>
