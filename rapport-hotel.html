@@ -1,0 +1,1023 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rapport Hôtel - Temple de Jeanne</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --beige: #efe6d8;
+      --accent: #a67c52;
+      --frame: #7a5234;
+      --panel: #f8f3ee;
+      --muted: #5b4a3f;
+      --shadow: 0 6px 18px rgba(0,0,0,.12);
+      --today: #c79a6d;
+      --todayText: #2d1f16;
+      --green: #3b7f3b;
+      --bordeaux: #8B0000;
+      --nuit: #2c3e50;
+      --matin: #f39c12;
+      --soir: #9b59b6;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Cinzel', Georgia, serif;
+      background: linear-gradient(180deg, var(--beige), #f7f1e6);
+      margin: 0;
+      padding: 24px;
+      color: var(--muted);
+    }
+    
+    .wrap {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    header {
+      background: linear-gradient(180deg, #fffaf3, var(--panel));
+      border: 4px solid var(--frame);
+      border-radius: 14px;
+      padding: 18px 22px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    
+    .header-title {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .logo {
+      width: 84px;
+      height: 84px;
+      border-radius: 12px;
+      border: 3px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #fff, #f0e7d8);
+    }
+    
+    .logo h1 {
+      margin: 0;
+      font-size: 22px;
+      color: var(--frame);
+    }
+    
+    header h2 {
+      margin: 0;
+      font-size: 32px;
+      color: var(--frame);
+    }
+    
+    .date-display {
+      font-size: 18px;
+      color: var(--accent);
+      margin-top: 5px;
+    }
+    
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      font-family: 'Cinzel', serif;
+      transition: all 0.2s;
+    }
+    
+    button:hover {
+      background: #8b6f47;
+      transform: translateY(-2px);
+    }
+    
+    button.secondary {
+      background: transparent;
+      border: 2px solid var(--accent);
+      color: var(--accent);
+    }
+    
+    button.secondary:hover {
+      background: var(--accent);
+      color: white;
+    }
+    
+    button.success {
+      background: var(--green);
+    }
+    
+    button.success:hover {
+      background: #2e6b2e;
+    }
+    
+    .card {
+      background: var(--panel);
+      border: 3px solid rgba(122,82,52,0.18);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid rgba(122,82,52,0.1);
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--frame);
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: var(--muted);
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background: #e8dcc4;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #c79a6d);
+      transition: width 0.3s ease;
+    }
+    
+    .shift-section {
+      margin-bottom: 20px;
+    }
+    
+    .shift-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--panel);
+      border: 3px solid var(--frame);
+      border-radius: 10px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    
+    .shift-header:hover {
+      background: #fff;
+      transform: translateX(4px);
+    }
+    
+    .shift-header.nuit {
+      border-left: 6px solid var(--nuit);
+    }
+    
+    .shift-header.matin {
+      border-left: 6px solid var(--matin);
+    }
+    
+    .shift-header.soir {
+      border-left: 6px solid var(--soir);
+    }
+    
+    .shift-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--frame);
+    }
+    
+    .shift-badge {
+      background: var(--accent);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+    
+    .shift-body {
+      padding: 20px;
+      background: white;
+      border: 2px solid rgba(122,82,52,0.1);
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+      display: none;
+    }
+    
+    .shift-body.open {
+      display: block;
+    }
+    
+    .task-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      padding: 14px;
+      border-bottom: 1px solid #f0e7d8;
+      transition: background 0.2s;
+    }
+    
+    .task-item:hover {
+      background: #fafaf8;
+    }
+    
+    .task-item:last-child {
+      border-bottom: none;
+    }
+    
+    .task-checkbox {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    
+    .task-content {
+      flex: 1;
+    }
+    
+    .task-title {
+      font-size: 16px;
+      color: var(--frame);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    
+    .task-number {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 14px;
+    }
+    
+    .task-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    
+    .task-badge {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .priority-high {
+      background: #ffebee;
+      color: #c62828;
+    }
+    
+    .priority-medium {
+      background: #fff8e1;
+      color: #f57c00;
+    }
+    
+    .priority-low {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .task-time {
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+    
+    .task-item.completed {
+      opacity: 0.6;
+    }
+    
+    .task-item.completed .task-title {
+      text-decoration: line-through;
+    }
+    
+    .observations-section {
+      margin-top: 30px;
+    }
+    
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      padding: 16px;
+      border: 2px solid #d6c8b4;
+      border-radius: 8px;
+      font-family: 'Cinzel', serif;
+      font-size: 15px;
+      resize: vertical;
+      background: white;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .action-buttons button {
+      padding: 14px 28px;
+      font-size: 16px;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .modal-content {
+      background: var(--panel);
+      border: 4px solid var(--frame);
+      border-radius: 14px;
+      padding: 30px;
+      max-width: 800px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.3);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid rgba(122,82,52,0.2);
+    }
+    
+    .modal-title {
+      font-size: 28px;
+      color: var(--frame);
+      margin: 0;
+    }
+    
+    .close-modal {
+      background: transparent;
+      border: none;
+      font-size: 32px;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .report-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .report-item {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      border: 2px solid rgba(122,82,52,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .report-item:hover {
+      border-color: var(--accent);
+      transform: translateX(4px);
+    }
+    
+    .report-info {
+      flex: 1;
+    }
+    
+    .report-date {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--frame);
+      margin-bottom: 4px;
+    }
+    
+    .report-stats {
+      font-size: 14px;
+      color: var(--muted);
+    }
+    
+    .report-badge {
+      background: var(--green);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .alert {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      color: #856404;
+    }
+    
+    .alert strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+    
+    @media (max-width: 768px) {
+      .stats-bar {
+        grid-template-columns: 1fr;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+      
+      .action-buttons button {
+        width: 100%;
+      }
+    }
+    
+    @media print {
+      .header-actions,
+      .action-buttons,
+      button {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Header -->
+    <header>
+      <div class="logo">
+        <h1>TdJ</h1>
+      </div>
+      <div class="header-title">
+        <h2>📊 Rapport Hôtel</h2>
+        <div class="date-display" id="current-date"></div>
+      </div>
+      <div class="header-actions">
+        <button onclick="location.href='index-new.html'">← Retour Accueil</button>
+        <button class="secondary" onclick="openArchives()">📁 Archives</button>
+        <button class="secondary" onclick="window.print()">🖨️ Imprimer</button>
+      </div>
+    </header>
+
+    <!-- Statistiques -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-value" id="completion-rate">0%</div>
+        <div class="stat-label">Taux de Completion</div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-bar" style="width: 0%"></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="tasks-completed">0/0</div>
+        <div class="stat-label">Tâches Complétées</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="shift-count">3</div>
+        <div class="stat-label">Shifts Actifs</div>
+      </div>
+    </div>
+
+    <!-- Shifts Checklists -->
+    <div id="shifts-container"></div>
+
+    <!-- Observations -->
+    <div class="card observations-section">
+      <h3 style="margin-top: 0; color: var(--frame); font-size: 24px;">📝 Observations du Jour</h3>
+      <textarea id="observations" placeholder="Notez ici les observations, incidents, ou remarques importantes du jour..."></textarea>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="success" onclick="validateReport()" style="flex: 1;">
+        ✅ Valider et Archiver le Rapport
+      </button>
+      <button class="secondary" onclick="resetReport()">
+        🔄 Réinitialiser le Rapport
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Archives -->
+  <div class="modal" id="archives-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">📁 Archives des Rapports</h3>
+        <button class="close-modal" onclick="closeArchives()">×</button>
+      </div>
+      <div id="archives-list" class="report-list"></div>
+    </div>
+  </div>
+
+  <!-- Modal Rapport Archivé -->
+  <div class="modal" id="report-view-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="report-view-title">Rapport du...</h3>
+        <button class="close-modal" onclick="closeReportView()">×</button>
+      </div>
+      <div id="report-view-content"></div>
+    </div>
+  </div>
+
+  <script>
+    // Données des checklists (importées depuis votre fichier JSON)
+    const CHECKLISTS = {
+      "nuit": {
+        "name": "Shift de Nuit",
+        "hours": "22h00 - 07h30",
+        "color": "nuit",
+        "tasks": [
+          {"id":1,"task":"Lire Rapport / Consignes","category":"administration","priority":"high","time":null},
+          {"id":2,"task":"Se connecter à sa session Medialog","category":"administration","priority":"high","time":null},
+          {"id":3,"task":"Vérifier la caisse","category":"caisse","priority":"high","time":null},
+          {"id":4,"task":"22h15~ : Fermer la grille et éteindre la musique en étage","category":"securite","priority":"high","time":"22h15"},
+          {"id":5,"task":"Éteindre les 2 lustres","category":"entretien","priority":"medium","time":null},
+          {"id":6,"task":"Laver et Sécher linge vers 00h","category":"entretien","priority":"medium","time":"00h00"},
+          {"id":7,"task":"Faire rondes dans les étages","category":"securite","priority":"high","time":null},
+          {"id":8,"task":"Remplir infos clients départs/arrivées du lendemain dans ce rapport hôtel","category":"administration","priority":"high","time":null},
+          {"id":9,"task":"Faire la fiche des chambres (départs+recouches)","category":"administration","priority":"high","time":null},
+          {"id":10,"task":"Faire toutes les vérifications réservations","category":"reservations","priority":"high","time":null},
+          {"id":11,"task":"Faire au minimum 7 vérif2 sur le planning","category":"reservations","priority":"high","time":null},
+          {"id":12,"task":"Vider poubelle Réception + Cuisine","category":"entretien","priority":"medium","time":null},
+          {"id":13,"task":"Sortir la bene vers 5h","category":"entretien","priority":"high","time":"05h00"},
+          {"id":14,"task":"Ouvrir la grille vers 6h","category":"securite","priority":"high","time":"06h00"},
+          {"id":15,"task":"6h30-45: Rentrer la bene","category":"entretien","priority":"high","time":"06h30"},
+          {"id":16,"task":"Passer aspirateur/balai réception et couloir entrée","category":"entretien","priority":"medium","time":null},
+          {"id":17,"task":"Réceptionner + Compter la commande boulangerie","category":"petit_dejeuner","priority":"high","time":null},
+          {"id":18,"task":"7h15~ : Mettre en place les tables PDJ et tours viennoiseries","category":"petit_dejeuner","priority":"high","time":"07h15"},
+          {"id":19,"task":"Rallumer les lustres","category":"entretien","priority":"medium","time":null},
+          {"id":20,"task":"Compter sa caisse et faire sa fiche caisse","category":"caisse","priority":"high","time":null}
+        ]
+      },
+      "matin": {
+        "name": "Shift du Matin",
+        "hours": "07h30 - 15h00",
+        "color": "matin",
+        "tasks": [
+          {"id":1,"task":"Lire Rapport / Consignes","category":"administration","priority":"high","time":null},
+          {"id":2,"task":"Se connecter à sa session Medialog","category":"administration","priority":"high","time":null},
+          {"id":3,"task":"Vérifier la caisse","category":"caisse","priority":"high","time":null},
+          {"id":4,"task":"Lancer la musique uniquement réception/cave","category":"entretien","priority":"low","time":null},
+          {"id":5,"task":"Faire fiche des étages par personnel de chambre","category":"administration","priority":"high","time":null},
+          {"id":6,"task":"8h-10h: Aider au PDJ quand c'est possible/nécessaire","category":"petit_dejeuner","priority":"medium","time":"08h00"},
+          {"id":7,"task":"9h: Lancer la musique dans les étages (volume sonores bas)","category":"entretien","priority":"low","time":"09h00"},
+          {"id":8,"task":"Passer l'aspirateur à la fin du PDJ","category":"entretien","priority":"medium","time":null},
+          {"id":9,"task":"Faire toutes les vérifications réservations","category":"reservations","priority":"high","time":null},
+          {"id":10,"task":"Faire au minimum 7 vérif2 sur le planning","category":"reservations","priority":"high","time":null},
+          {"id":11,"task":"Après le dernier check-out: compter sa caisse et faire sa fiche caisse","category":"caisse","priority":"high","time":null},
+          {"id":12,"task":"Clôturer shift et effectuer la main courante après dernier check-out","category":"administration","priority":"high","time":null},
+          {"id":13,"task":"Désactiver chauffage des chambres vides et sans arrivées","category":"entretien","priority":"medium","time":null},
+          {"id":14,"task":"Ranger les fiches PDJ et étage dans le module de tri","category":"administration","priority":"low","time":null},
+          {"id":15,"task":"Monter les bagages des arrivées stockés en bagagerie","category":"service_client","priority":"medium","time":null},
+          {"id":16,"task":"Préparer les pochettes de carte des arrivées","category":"service_client","priority":"high","time":null}
+        ]
+      },
+      "soir": {
+        "name": "Shift du Soir",
+        "hours": "15h00 - 22h00",
+        "color": "soir",
+        "tasks": [
+          {"id":1,"task":"Lire Rapport / Consignes","category":"administration","priority":"high","time":null},
+          {"id":2,"task":"Se connecter à sa session Medialog","category":"administration","priority":"high","time":null},
+          {"id":3,"task":"Vérifier la caisse","category":"caisse","priority":"high","time":null},
+          {"id":4,"task":"Programmer les cartes chambre","category":"service_client","priority":"high","time":null},
+          {"id":5,"task":"(Lundi uniquement) Faire la commande Marly","category":"commandes","priority":"medium","time":null},
+          {"id":6,"task":"Faire toutes les vérifications réservations","category":"reservations","priority":"high","time":null},
+          {"id":7,"task":"Faire au minimum 7 vérif2 sur le planning","category":"reservations","priority":"high","time":null},
+          {"id":8,"task":"Compter les PDJ pour le lendemain","category":"petit_dejeuner","priority":"high","time":null},
+          {"id":9,"task":"Remplir fiche horaires PDJ du lendemain","category":"petit_dejeuner","priority":"high","time":null},
+          {"id":10,"task":"Passer la commande boulangerie","category":"commandes","priority":"high","time":null},
+          {"id":11,"task":"À la fin du shift, compter sa caisse et faire la fiche caisse","category":"caisse","priority":"high","time":null}
+        ]
+      }
+    };
+
+    // Storage basique (localStorage)
+    const storage = {
+      get: (key) => {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : null;
+      },
+      set: (key, value) => {
+        localStorage.setItem(key, JSON.stringify(value));
+      }
+    };
+
+    // Initialisation
+    let currentReport = null;
+
+    function init() {
+      // Afficher la date
+      const today = new Date();
+      const dateStr = today.toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      document.getElementById('current-date').textContent = dateStr;
+
+      // Charger ou créer le rapport du jour
+      loadOrCreateTodayReport();
+      
+      // Rendre les shifts
+      renderShifts();
+      
+      // Charger les observations
+      loadObservations();
+      
+      // Mettre à jour les stats
+      updateStats();
+    }
+
+    function getTodayKey() {
+      const today = new Date();
+      return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    }
+
+    function loadOrCreateTodayReport() {
+      const todayKey = getTodayKey();
+      const reports = storage.get('hotel_reports') || {};
+      
+      if (!reports[todayKey]) {
+        // Créer un nouveau rapport
+        reports[todayKey] = {
+          date: todayKey,
+          dateDisplay: new Date().toLocaleDateString('fr-FR'),
+          shifts: {
+            nuit: CHECKLISTS.nuit.tasks.map(t => ({ ...t, completed: false })),
+            matin: CHECKLISTS.matin.tasks.map(t => ({ ...t, completed: false })),
+            soir: CHECKLISTS.soir.tasks.map(t => ({ ...t, completed: false }))
+          },
+          observations: '',
+          validated: false,
+          validatedAt: null
+        };
+        storage.set('hotel_reports', reports);
+      }
+      
+      currentReport = reports[todayKey];
+    }
+
+    function renderShifts() {
+      const container = document.getElementById('shifts-container');
+      container.innerHTML = '';
+
+      ['nuit', 'matin', 'soir'].forEach(shiftKey => {
+        const shift = CHECKLISTS[shiftKey];
+        const tasks = currentReport.shifts[shiftKey];
+        
+        const completed = tasks.filter(t => t.completed).length;
+        const total = tasks.length;
+        
+        const section = document.createElement('div');
+        section.className = 'shift-section';
+        
+        section.innerHTML = `
+          <div class="shift-header ${shift.color}" onclick="toggleShift('${shiftKey}')">
+            <div class="shift-title">
+              <span>${shift.name === 'Shift de Nuit' ? '🌙' : shift.name === 'Shift du Matin' ? '☀️' : '🌆'}</span>
+              <span>${shift.name}</span>
+              <span style="color: var(--muted); font-size: 16px; font-weight: 400;">${shift.hours}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span class="shift-badge">${completed}/${total}</span>
+              <span id="arrow-${shiftKey}" style="font-size: 24px; transition: transform 0.2s;">▼</span>
+            </div>
+          </div>
+          <div class="shift-body" id="body-${shiftKey}">
+            ${renderTasks(shiftKey, tasks)}
+          </div>
+        `;
+        
+        container.appendChild(section);
+      });
+    }
+
+    function renderTasks(shiftKey, tasks) {
+      return tasks.map(task => {
+        const priorityClass = `priority-${task.priority}`;
+        const priorityText = task.priority === 'high' ? '🔴 Haute' : 
+                           task.priority === 'medium' ? '🟡 Moyenne' : '🟢 Basse';
+        
+        return `
+          <div class="task-item ${task.completed ? 'completed' : ''}">
+            <input 
+              type="checkbox" 
+              class="task-checkbox" 
+              ${task.completed ? 'checked' : ''}
+              onchange="toggleTask('${shiftKey}', ${task.id})"
+            />
+            <div class="task-content">
+              <div class="task-title">
+                <span class="task-number">#${task.id}</span>
+                <span>${task.task}</span>
+              </div>
+              <div class="task-meta">
+                <span class="task-badge ${priorityClass}">${priorityText}</span>
+                ${task.time ? `<span class="task-badge task-time">🕐 ${task.time}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleShift(shiftKey) {
+      const body = document.getElementById(`body-${shiftKey}`);
+      const arrow = document.getElementById(`arrow-${shiftKey}`);
+      
+      if (body.classList.contains('open')) {
+        body.classList.remove('open');
+        arrow.style.transform = 'rotate(0deg)';
+      } else {
+        body.classList.add('open');
+        arrow.style.transform = 'rotate(180deg)';
+      }
+    }
+
+    function toggleTask(shiftKey, taskId) {
+      const task = currentReport.shifts[shiftKey].find(t => t.id === taskId);
+      task.completed = !task.completed;
+      
+      // Sauvegarder
+      const reports = storage.get('hotel_reports') || {};
+      reports[getTodayKey()] = currentReport;
+      storage.set('hotel_reports', reports);
+      
+      // Re-render
+      renderShifts();
+      updateStats();
+    }
+
+    function updateStats() {
+      let totalTasks = 0;
+      let completedTasks = 0;
+      
+      Object.values(currentReport.shifts).forEach(tasks => {
+        totalTasks += tasks.length;
+        completedTasks += tasks.filter(t => t.completed).length;
+      });
+      
+      const rate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+      
+      document.getElementById('completion-rate').textContent = rate + '%';
+      document.getElementById('tasks-completed').textContent = `${completedTasks}/${totalTasks}`;
+      document.getElementById('progress-bar').style.width = rate + '%';
+    }
+
+    function loadObservations() {
+      document.getElementById('observations').value = currentReport.observations || '';
+    }
+
+    function saveObservations() {
+      currentReport.observations = document.getElementById('observations').value;
+      const reports = storage.get('hotel_reports') || {};
+      reports[getTodayKey()] = currentReport;
+      storage.set('hotel_reports', reports);
+    }
+
+    // Sauvegarder les observations automatiquement
+    document.getElementById('observations').addEventListener('input', saveObservations);
+
+    function validateReport() {
+      // Vérifier que toutes les tâches sont complétées
+      let totalTasks = 0;
+      let completedTasks = 0;
+      
+      Object.values(currentReport.shifts).forEach(tasks => {
+        totalTasks += tasks.length;
+        completedTasks += tasks.filter(t => t.completed).length;
+      });
+      
+      if (completedTasks < totalTasks) {
+        const confirm = window.confirm(
+          `Attention: Seulement ${completedTasks}/${totalTasks} tâches sont complétées.\n\n` +
+          `Voulez-vous vraiment valider et archiver ce rapport ?`
+        );
+        if (!confirm) return;
+      }
+      
+      // Marquer comme validé
+      currentReport.validated = true;
+      currentReport.validatedAt = new Date().toISOString();
+      
+      const reports = storage.get('hotel_reports') || {};
+      reports[getTodayKey()] = currentReport;
+      storage.set('hotel_reports', reports);
+      
+      alert('✅ Rapport validé et archivé avec succès !');
+      
+      // Optionnel: rediriger vers l'accueil
+      // location.href = 'index-new.html';
+    }
+
+    function resetReport() {
+      if (!confirm('⚠️ Voulez-vous vraiment réinitialiser le rapport du jour ?\n\nToutes les données seront effacées !')) {
+        return;
+      }
+      
+      const reports = storage.get('hotel_reports') || {};
+      delete reports[getTodayKey()];
+      storage.set('hotel_reports', reports);
+      
+      location.reload();
+    }
+
+    function openArchives() {
+      const modal = document.getElementById('archives-modal');
+      const list = document.getElementById('archives-list');
+      
+      const reports = storage.get('hotel_reports') || {};
+      const sortedDates = Object.keys(reports).sort().reverse();
+      
+      if (sortedDates.length === 0) {
+        list.innerHTML = '<p style="text-align: center; color: var(--muted);">Aucun rapport archivé</p>';
+      } else {
+        list.innerHTML = sortedDates.map(date => {
+          const report = reports[date];
+          let totalTasks = 0;
+          let completedTasks = 0;
+          
+          Object.values(report.shifts).forEach(tasks => {
+            totalTasks += tasks.length;
+            completedTasks += tasks.filter(t => t.completed).length;
+          });
+          
+          const rate = Math.round((completedTasks / totalTasks) * 100);
+          
+          return `
+            <div class="report-item" onclick="viewReport('${date}')">
+              <div class="report-info">
+                <div class="report-date">${report.dateDisplay || date}</div>
+                <div class="report-stats">
+                  ${completedTasks}/${totalTasks} tâches complétées (${rate}%)
+                  ${report.validated ? ' • ✅ Validé' : ' • ⚠️ Non validé'}
+                </div>
+              </div>
+              <span style="font-size: 24px; color: var(--accent);">→</span>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      modal.style.display = 'flex';
+    }
+
+    function closeArchives() {
+      document.getElementById('archives-modal').style.display = 'none';
+    }
+
+    function viewReport(date) {
+      const reports = storage.get('hotel_reports') || {};
+      const report = reports[date];
+      
+      if (!report) return;
+      
+      const modal = document.getElementById('report-view-modal');
+      const title = document.getElementById('report-view-title');
+      const content = document.getElementById('report-view-content');
+      
+      title.textContent = `Rapport du ${report.dateDisplay || date}`;
+      
+      let html = '';
+      
+      // Stats
+      let totalTasks = 0;
+      let completedTasks = 0;
+      Object.values(report.shifts).forEach(tasks => {
+        totalTasks += tasks.length;
+        completedTasks += tasks.filter(t => t.completed).length;
+      });
+      const rate = Math.round((completedTasks / totalTasks) * 100);
+      
+      html += `
+        <div style="background: ${report.validated ? '#e8f5e9' : '#fff3cd'}; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+          <strong>${report.validated ? '✅ Rapport Validé' : '⚠️ Rapport Non Validé'}</strong>
+          ${report.validatedAt ? `<br><small>Validé le ${new Date(report.validatedAt).toLocaleString('fr-FR')}</small>` : ''}
+          <br><br>
+          <strong>Progression:</strong> ${completedTasks}/${totalTasks} tâches (${rate}%)
+        </div>
+      `;
+      
+      // Shifts
+      ['nuit', 'matin', 'soir'].forEach(shiftKey => {
+        const shift = CHECKLISTS[shiftKey];
+        const tasks = report.shifts[shiftKey];
+        const completed = tasks.filter(t => t.completed).length;
+        
+        html += `
+          <h3 style="color: var(--frame); margin-top: 20px;">
+            ${shift.name === 'Shift de Nuit' ? '🌙' : shift.name === 'Shift du Matin' ? '☀️' : '🌆'}
+            ${shift.name} (${completed}/${tasks.length})
+          </h3>
+          <div style="background: white; padding: 16px; border-radius: 8px; border: 2px solid rgba(122,82,52,0.1);">
+        `;
+        
+        tasks.forEach(task => {
+          html += `
+            <div style="padding: 8px 0; border-bottom: 1px solid #f0e7d8; display: flex; gap: 10px;">
+              <span>${task.completed ? '✅' : '⬜'}</span>
+              <span style="${task.completed ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${task.task}</span>
+            </div>
+          `;
+        });
+        
+        html += '</div>';
+      });
+      
+      // Observations
+      if (report.observations) {
+        html += `
+          <h3 style="color: var(--frame); margin-top: 20px;">📝 Observations</h3>
+          <div style="background: white; padding: 16px; border-radius: 8px; border: 2px solid rgba(122,82,52,0.1); white-space: pre-wrap;">
+            ${report.observations}
+          </div>
+        `;
+      }
+      
+      content.innerHTML = html;
+      modal.style.display = 'flex';
+    }
+
+    function closeReportView() {
+      document.getElementById('report-view-modal').style.display = 'none';
+    }
+
+    // Fermer les modals en cliquant à l'extérieur
+    document.getElementById('archives-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeArchives();
+    });
+    
+    document.getElementById('report-view-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeReportView();
+    });
+
+    // Initialiser au chargement
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
