@@ -586,8 +586,8 @@
     // Données des checklists (importées depuis votre fichier JSON)
     const CHECKLISTS = {
       "nuit": {
-        "name": "Shift de Nuit",
-        "hours": "22h00 - 07h30",
+        "name": "Shift Nuit",
+        "hours": "20h - 8h",
         "color": "nuit",
         "tasks": [
           {"id":1,"task":"Lire Rapport / Consignes","category":"administration","priority":"high","time":null},
@@ -613,8 +613,8 @@
         ]
       },
       "matin": {
-        "name": "Shift du Matin",
-        "hours": "07h30 - 15h00",
+        "name": "Shift Matin",
+        "hours": "8h - 15h",
         "color": "matin",
         "tasks": [
           {"id":1,"task":"Lire Rapport / Consignes","category":"administration","priority":"high","time":null},
@@ -636,8 +636,8 @@
         ]
       },
       "soir": {
-        "name": "Shift du Soir",
-        "hours": "15h00 - 22h00",
+        "name": "Shift Après-midi",
+        "hours": "13h - 20h",
         "color": "soir",
         "tasks": [
           {"id":1,"task":"Lire Rapport / Consignes","category":"administration","priority":"high","time":null},
@@ -726,7 +726,7 @@
       const container = document.getElementById('shifts-container');
       container.innerHTML = '';
 
-      ['nuit', 'matin', 'soir'].forEach(shiftKey => {
+      ['matin', 'soir', 'nuit'].forEach(shiftKey => {
         const shift = CHECKLISTS[shiftKey];
         const tasks = currentReport.shifts[shiftKey];
         
@@ -739,7 +739,7 @@
         section.innerHTML = `
           <div class="shift-header ${shift.color}" onclick="toggleShift('${shiftKey}')">
             <div class="shift-title">
-              <span>${shift.name === 'Shift de Nuit' ? '🌙' : shift.name === 'Shift du Matin' ? '☀️' : '🌆'}</span>
+              <span>${shift.name === 'Shift Nuit' ? '🌙' : shift.name === 'Shift Matin' ? '☀️' : '🌆'}</span>
               <span>${shift.name}</span>
               <span style="color: var(--muted); font-size: 16px; font-weight: 400;">${shift.hours}</span>
             </div>
@@ -803,14 +803,40 @@
       const task = currentReport.shifts[shiftKey].find(t => t.id === taskId);
       task.completed = !task.completed;
       
+      // Mettre à jour visuellement la tâche
+      const checkbox = event.target;
+      const taskItem = checkbox.closest('.task-item');
+      if (taskItem) {
+        if (task.completed) {
+          taskItem.classList.add('completed');
+        } else {
+          taskItem.classList.remove('completed');
+        }
+      }
+      
       // Sauvegarder
       const reports = storage.get('hotel_reports') || {};
       reports[getTodayKey()] = currentReport;
       storage.set('hotel_reports', reports);
       
-      // Re-render
-      renderShifts();
+      // Mettre à jour seulement le badge du shift et les stats globales
+      updateShiftBadge(shiftKey);
       updateStats();
+    }
+
+    function updateShiftBadge(shiftKey) {
+      const tasks = currentReport.shifts[shiftKey];
+      const completed = tasks.filter(t => t.completed).length;
+      const total = tasks.length;
+      
+      // Trouver et mettre à jour le badge
+      const shiftSection = document.querySelector(`[onclick="toggleShift('${shiftKey}')"]`);
+      if (shiftSection) {
+        const badge = shiftSection.querySelector('.shift-badge');
+        if (badge) {
+          badge.textContent = `${completed}/${total}`;
+        }
+      }
     }
 
     function updateStats() {
@@ -843,7 +869,7 @@
     // Sauvegarder les observations automatiquement
     document.getElementById('observations').addEventListener('input', saveObservations);
 
-    function validateReport() {
+    async function validateReport() {
       // Vérifier que toutes les tâches sont complétées
       let totalTasks = 0;
       let completedTasks = 0;
@@ -869,10 +895,38 @@
       reports[getTodayKey()] = currentReport;
       storage.set('hotel_reports', reports);
       
-      alert('✅ Rapport validé et archivé avec succès !');
+      // Envoyer par email
+      try {
+        await sendReportEmail(currentReport, currentReport.dateDisplay);
+        alert('✅ Rapport validé, archivé et envoyé par email avec succès !');
+      } catch (error) {
+        console.error('Erreur envoi email:', error);
+        alert('✅ Rapport validé et archivé avec succès !\n\n⚠️ Erreur lors de l\'envoi de l\'email : ' + error.message);
+      }
       
       // Optionnel: rediriger vers l'accueil
-      // location.href = 'index-new.html';
+      // location.href = 'index.html';
+    }
+
+    async function sendReportEmail(report, date) {
+      const response = await fetch('https://temple-jeanne-mailer.reservation-083.workers.dev', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          report: report,
+          date: date
+        })
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erreur inconnue');
+      }
+
+      return result;
     }
 
     function resetReport() {
@@ -964,14 +1018,14 @@
       `;
       
       // Shifts
-      ['nuit', 'matin', 'soir'].forEach(shiftKey => {
+      ['matin', 'soir', 'nuit'].forEach(shiftKey => {
         const shift = CHECKLISTS[shiftKey];
         const tasks = report.shifts[shiftKey];
         const completed = tasks.filter(t => t.completed).length;
         
         html += `
           <h3 style="color: var(--frame); margin-top: 20px;">
-            ${shift.name === 'Shift de Nuit' ? '🌙' : shift.name === 'Shift du Matin' ? '☀️' : '🌆'}
+            ${shift.name === 'Shift Nuit' ? '🌙' : shift.name === 'Shift Matin' ? '☀️' : '🌆'}
             ${shift.name} (${completed}/${tasks.length})
           </h3>
           <div style="background: white; padding: 16px; border-radius: 8px; border: 2px solid rgba(122,82,52,0.1);">
@@ -999,8 +1053,35 @@
         `;
       }
       
+      // Bouton renvoyer par email
+      html += `
+        <div style="margin-top: 30px; text-align: center;">
+          <button onclick="resendReportEmail('${date}')" style="background: var(--accent); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; font-family: 'Cinzel', serif;">
+            📧 Renvoyer ce rapport par email
+          </button>
+        </div>
+      `;
+      
       content.innerHTML = html;
       modal.style.display = 'flex';
+    }
+
+    async function resendReportEmail(date) {
+      const reports = storage.get('hotel_reports') || {};
+      const report = reports[date];
+      
+      if (!report) {
+        alert('❌ Rapport introuvable');
+        return;
+      }
+      
+      try {
+        await sendReportEmail(report, report.dateDisplay || date);
+        alert('✅ Rapport renvoyé par email avec succès !');
+      } catch (error) {
+        console.error('Erreur envoi email:', error);
+        alert('❌ Erreur lors de l\'envoi de l\'email : ' + error.message);
+      }
     }
 
     function closeReportView() {
