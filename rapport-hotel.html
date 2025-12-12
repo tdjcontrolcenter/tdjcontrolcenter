@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Rapport Hôtel - Temple de Jeanne</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script type="text/javascript">
+    (function(){
+      emailjs.init("V-GZIcQUOxv3iKyU1");
+    })();
+  </script>
   <style>
     :root {
       --beige: #efe6d8;
@@ -909,24 +915,73 @@
     }
 
     async function sendReportEmail(report, date) {
-      const response = await fetch('https://temple-jeanne-mailer.reservation-083.workers.dev', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          report: report,
-          date: date
-        })
+      // Construire le contenu du rapport en texte formaté
+      let reportContent = `📊 STATISTIQUES\n`;
+      reportContent += `====================\n\n`;
+      
+      let totalTasks = 0;
+      let completedTasks = 0;
+      Object.values(report.shifts).forEach(tasks => {
+        totalTasks += tasks.length;
+        completedTasks += tasks.filter(t => t.completed).length;
       });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error || 'Erreur inconnue');
+      const rate = Math.round((completedTasks / totalTasks) * 100);
+      
+      reportContent += `Statut: ${report.validated ? '✅ Validé' : '⚠️ Non validé'}\n`;
+      reportContent += `Progression: ${completedTasks}/${totalTasks} tâches complétées (${rate}%)\n\n`;
+      
+      // Shifts
+      const shifts = {
+        matin: { name: 'Shift Matin', icon: '☀️' },
+        soir: { name: 'Shift Après-midi', icon: '🌆' },
+        nuit: { name: 'Shift Nuit', icon: '🌙' }
+      };
+      
+      ['matin', 'soir', 'nuit'].forEach(key => {
+        const shift = shifts[key];
+        const tasks = report.shifts[key];
+        const completed = tasks.filter(t => t.completed).length;
+        
+        reportContent += `\n${shift.icon} ${shift.name.toUpperCase()} (${completed}/${tasks.length})\n`;
+        reportContent += `${'='.repeat(50)}\n\n`;
+        
+        tasks.forEach(task => {
+          reportContent += `${task.completed ? '✅' : '⬜'} ${task.task}\n`;
+        });
+      });
+      
+      // Observations
+      if (report.observations) {
+        reportContent += `\n\n📝 OBSERVATIONS\n`;
+        reportContent += `====================\n\n`;
+        reportContent += report.observations;
       }
-
-      return result;
+      
+      // Paramètres pour EmailJS
+      const templateParams = {
+        date: date,
+        report_content: reportContent,
+        to_email_1: 'direction@letempledejeanne.com',
+        to_email_2: 'manager@letempledejeanne.com'
+      };
+      
+      try {
+        // Envoi à la première adresse
+        await emailjs.send('service_l7l17ho', 'template_sari1vl', {
+          ...templateParams,
+          to_email: 'direction@letempledejeanne.com'
+        });
+        
+        // Envoi à la deuxième adresse
+        await emailjs.send('service_l7l17ho', 'template_sari1vl', {
+          ...templateParams,
+          to_email: 'manager@letempledejeanne.com'
+        });
+        
+        return { success: true };
+      } catch (error) {
+        throw new Error(error.text || error.message || 'Erreur EmailJS');
+      }
     }
 
     function resetReport() {
