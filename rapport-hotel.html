@@ -588,7 +588,15 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+  (function() {
+    'use strict';
+    
+    const SUPABASE_URL = 'https://nuzvzkyngltjvcmdbzcp.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51enZ6a3luZ2x0anZjbWRiemNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNzk2ODEsImV4cCI6MjA4MDc1NTY4MX0.TiB7ZDcxeNls9I0MwcSagaMpbMRC4DrDQ5T1SJkgzCY';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
     // Données des checklists (importées depuis votre fichier JSON)
     const CHECKLISTS = {
       "nuit": {
@@ -661,21 +669,52 @@
       }
     };
 
-    // Storage basique (localStorage)
+    // Storage avec Supabase
     const storage = {
-      get: (key) => {
-        const item = localStorage.getItem(key);
-        return item ? JSON.parse(item) : null;
+      async get(key) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('tdj_data')
+            .select('value')
+            .eq('key', key)
+            .single();
+          
+          // PGRST116 = ligne non trouvée, c'est normal
+          if (error && error.code !== 'PGRST116') {
+            console.error('Supabase get error:', JSON.stringify(error, null, 2));
+            console.error('Error details:', error.message, error.details, error.hint);
+            return null;
+          }
+          
+          return data ? data.value : null;
+        } catch (e) {
+          console.error('Storage get exception:', e);
+          return null;
+        }
       },
-      set: (key, value) => {
-        localStorage.setItem(key, JSON.stringify(value));
+      
+      async set(key, value) {
+        try {
+          const { error } = await supabaseClient
+            .from('tdj_data')
+            .upsert({ key: key, value: value }, { onConflict: 'key' });
+          
+          if (error) {
+            console.error('Supabase set error:', JSON.stringify(error, null, 2));
+            console.error('Error details:', error.message, error.details, error.hint);
+            alert('⚠️ Erreur de sauvegarde : ' + error.message);
+          }
+        } catch (e) {
+          console.error('Storage set exception:', e);
+          alert('⚠️ Erreur de sauvegarde : ' + e.message);
+        }
       }
     };
 
     // Initialisation
     let currentReport = null;
 
-    function init() {
+    async function init() {
       // Afficher la date
       const today = new Date();
       const dateStr = today.toLocaleDateString('fr-FR', {
@@ -687,7 +726,7 @@
       document.getElementById('current-date').textContent = dateStr;
 
       // Charger ou créer le rapport du jour
-      loadOrCreateTodayReport();
+      await loadOrCreateTodayReport();
       
       // Rendre les shifts
       renderShifts();
@@ -704,28 +743,38 @@
       return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     }
 
-    function loadOrCreateTodayReport() {
+    async function loadOrCreateTodayReport() {
       const todayKey = getTodayKey();
-      const reports = storage.get('hotel_reports') || {};
       
-      if (!reports[todayKey]) {
-        // Créer un nouveau rapport
-        reports[todayKey] = {
-          date: todayKey,
-          dateDisplay: new Date().toLocaleDateString('fr-FR'),
-          shifts: {
-            nuit: CHECKLISTS.nuit.tasks.map(t => ({ ...t, completed: false })),
-            matin: CHECKLISTS.matin.tasks.map(t => ({ ...t, completed: false })),
-            soir: CHECKLISTS.soir.tasks.map(t => ({ ...t, completed: false }))
-          },
-          observations: '',
-          validated: false,
-          validatedAt: null
-        };
-        storage.set('hotel_reports', reports);
+      try {
+        const reports = await storage.get('hotel_reports') || {};
+        
+        if (!reports[todayKey]) {
+          console.log('📝 Création du rapport du jour...');
+          // Créer un nouveau rapport
+          reports[todayKey] = {
+            date: todayKey,
+            dateDisplay: new Date().toLocaleDateString('fr-FR'),
+            shifts: {
+              nuit: CHECKLISTS.nuit.tasks.map(t => ({ ...t, completed: false })),
+              matin: CHECKLISTS.matin.tasks.map(t => ({ ...t, completed: false })),
+              soir: CHECKLISTS.soir.tasks.map(t => ({ ...t, completed: false }))
+            },
+            observations: '',
+            validated: false,
+            validatedAt: null
+          };
+          await storage.set('hotel_reports', reports);
+          console.log('✅ Rapport créé avec succès');
+        } else {
+          console.log('✅ Rapport du jour chargé depuis Supabase');
+        }
+        
+        currentReport = reports[todayKey];
+      } catch (error) {
+        console.error('❌ Erreur fatale lors du chargement:', error);
+        alert('❌ Erreur : Impossible de charger le rapport. Vérifiez votre connexion et Supabase.');
       }
-      
-      currentReport = reports[todayKey];
     }
 
     function renderShifts() {
@@ -804,8 +853,11 @@
         arrow.style.transform = 'rotate(180deg)';
       }
     }
+    
+    // Rendre les fonctions globales pour les onclick
+    window.toggleShift = toggleShift;
 
-    function toggleTask(shiftKey, taskId) {
+    async function toggleTask(shiftKey, taskId) {
       const task = currentReport.shifts[shiftKey].find(t => t.id === taskId);
       task.completed = !task.completed;
       
@@ -821,14 +873,16 @@
       }
       
       // Sauvegarder
-      const reports = storage.get('hotel_reports') || {};
+      const reports = await storage.get('hotel_reports') || {};
       reports[getTodayKey()] = currentReport;
-      storage.set('hotel_reports', reports);
+      await storage.set('hotel_reports', reports);
       
       // Mettre à jour seulement le badge du shift et les stats globales
       updateShiftBadge(shiftKey);
       updateStats();
     }
+    
+    window.toggleTask = toggleTask;
 
     function updateShiftBadge(shiftKey) {
       const tasks = currentReport.shifts[shiftKey];
@@ -865,11 +919,11 @@
       document.getElementById('observations').value = currentReport.observations || '';
     }
 
-    function saveObservations() {
+    async function saveObservations() {
       currentReport.observations = document.getElementById('observations').value;
-      const reports = storage.get('hotel_reports') || {};
+      const reports = await storage.get('hotel_reports') || {};
       reports[getTodayKey()] = currentReport;
-      storage.set('hotel_reports', reports);
+      await storage.set('hotel_reports', reports);
     }
 
     // Sauvegarder les observations automatiquement
@@ -897,9 +951,9 @@
       currentReport.validated = true;
       currentReport.validatedAt = new Date().toISOString();
       
-      const reports = storage.get('hotel_reports') || {};
+      const reports = await storage.get('hotel_reports') || {};
       reports[getTodayKey()] = currentReport;
-      storage.set('hotel_reports', reports);
+      await storage.set('hotel_reports', reports);
       
       // Envoyer par email
       try {
@@ -984,23 +1038,23 @@
       }
     }
 
-    function resetReport() {
+    async function resetReport() {
       if (!confirm('⚠️ Voulez-vous vraiment réinitialiser le rapport du jour ?\n\nToutes les données seront effacées !')) {
         return;
       }
       
-      const reports = storage.get('hotel_reports') || {};
+      const reports = await storage.get('hotel_reports') || {};
       delete reports[getTodayKey()];
-      storage.set('hotel_reports', reports);
+      await storage.set('hotel_reports', reports);
       
       location.reload();
     }
 
-    function openArchives() {
+    async function openArchives() {
       const modal = document.getElementById('archives-modal');
       const list = document.getElementById('archives-list');
       
-      const reports = storage.get('hotel_reports') || {};
+      const reports = await storage.get('hotel_reports') || {};
       const sortedDates = Object.keys(reports).sort().reverse();
       
       if (sortedDates.length === 0) {
@@ -1040,8 +1094,8 @@
       document.getElementById('archives-modal').style.display = 'none';
     }
 
-    function viewReport(date) {
-      const reports = storage.get('hotel_reports') || {};
+    async function viewReport(date) {
+      const reports = await storage.get('hotel_reports') || {};
       const report = reports[date];
       
       if (!report) return;
@@ -1122,7 +1176,7 @@
     }
 
     async function resendReportEmail(date) {
-      const reports = storage.get('hotel_reports') || {};
+      const reports = await storage.get('hotel_reports') || {};
       const report = reports[date];
       
       if (!report) {
@@ -1154,6 +1208,17 @@
 
     // Initialiser au chargement
     window.addEventListener('DOMContentLoaded', init);
+    
+    // Rendre toutes les fonctions globales pour les onclick
+    window.validateReport = validateReport;
+    window.resetReport = resetReport;
+    window.openArchives = openArchives;
+    window.closeArchives = closeArchives;
+    window.viewReport = viewReport;
+    window.closeReportView = closeReportView;
+    window.resendReportEmail = resendReportEmail;
+    
+  })(); // Fin de l'IIFE
   </script>
 </body>
 </html>
