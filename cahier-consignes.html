@@ -261,15 +261,18 @@
   </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+(function() {
+'use strict';
+
 const SUPABASE_URL='https://nuzvzkyngltjvcmdbzcp.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51enZ6a3luZ2x0anZjbWRiemNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNzk2ODEsImV4cCI6MjA4MDc1NTY4MX0.TiB7ZDcxeNls9I0MwcSagaMpbMRC4DrDQ5T1SJkgzCY';
-const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const ROOMS=['11','12','21','22','23','24','31','32','33','34','41','42','43','44','51','52','61'];
 window.addEventListener('DOMContentLoaded',async function(){
 let serverStatus='ok';
 const storage={
-async get(k){try{const{data,error}=await supabase.from('tdj_data').select('value').eq('key',k).single();if(error&&error.code!=='PGRST116'){console.error('Error:',error);serverStatus='error';updateServerStatus();return null}serverStatus='ok';updateServerStatus();return data?data.value:null}catch(e){console.error(e);serverStatus='error';updateServerStatus();return null}},
-async set(k,v){try{const{error}=await supabase.from('tdj_data').upsert({key:k,value:v},{onConflict:'key'});if(error){console.error('Error:',error);serverStatus='error';updateServerStatus();alert('⚠️ Erreur: '+error.message);return}serverStatus='ok';updateServerStatus()}catch(e){console.error(e);serverStatus='error';updateServerStatus();alert('⚠️ Erreur: '+e.message)}}
+async get(k){try{const{data,error}=await supabaseClient.from('tdj_data').select('value').eq('key',k).single();if(error&&error.code!=='PGRST116'){console.error('Error:',error);serverStatus='error';updateServerStatus();return null}serverStatus='ok';updateServerStatus();return data?data.value:null}catch(e){console.error(e);serverStatus='error';updateServerStatus();return null}},
+async set(k,v){try{const{error}=await supabaseClient.from('tdj_data').upsert({key:k,value:v},{onConflict:'key'});if(error){console.error('Error:',error);serverStatus='error';updateServerStatus();alert('⚠️ Erreur: '+error.message);return}serverStatus='ok';updateServerStatus()}catch(e){console.error(e);serverStatus='error';updateServerStatus();alert('⚠️ Erreur: '+e.message)}}
 };
 function pad(n){return String(n).padStart(2,'0')}
 function localDateStr(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
@@ -320,6 +323,7 @@ document.querySelectorAll('.tab').forEach(tab=>{tab.addEventListener('click',fun
 renderAuthStatus();renderDay(selectedDate);buildMonthStrip(currentMonthDate);renderEditSpecList();renderDeletedHistory();
 console.log('✅ Version 4 complète chargée - Avec édition, reports et historique !');
 });
+})(); // Fin de l'IIFE
 </script>
 </body>
 </html>
